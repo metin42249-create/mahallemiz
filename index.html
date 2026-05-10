@@ -3,205 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sivil Mahalle Ağı | V2</title>
-    
+    <title>Sivil Ağ V3 | Hata Ayıklama Modu</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/lib/radix.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/lib/radisk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/lib/store.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/lib/rse.js"></script>
-    
     <style>
-        :root {
-            --bg: #f8f9fa;
-            --panel: #ffffff;
-            --primary: #2c3e50;
-        }
-
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); overflow: hidden; }
-        
-        #map { height: 60vh; width: 100%; z-index: 1; }
-
-        .control-panel {
-            height: 40vh; background: var(--panel); box-shadow: 0 -3px 15px rgba(0,0,0,0.1);
-            padding: 15px; display: flex; flex-direction: column; gap: 10px;
-            overflow-y: auto; position: relative; z-index: 1000; box-sizing: border-box;
-        }
-
-        .row { display: flex; gap: 8px; align-items: center; width: 100%; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; width: 100%; box-sizing: border-box; }
-        
-        .status-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; }
-        .status-btn { 
-            padding: 10px 14px; border-radius: 20px; border: 1px solid #ddd; 
-            font-size: 0.85rem; cursor: pointer; white-space: nowrap; background: #fff; transition: 0.2s;
-        }
-        .status-btn.active { background: var(--primary); color: white; border-color: var(--primary); font-weight: bold; }
-
-        button.publish-btn { 
-            background: #27ae60; color: white; border: none; padding: 14px; 
-            border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem;
-        }
-        button.publish-btn:active { background: #219653; transform: scale(0.98); }
-
-        .info-bar { 
-            position: absolute; top: 10px; left: 10px; z-index: 1001; 
-            background: rgba(255,255,255,0.95); padding: 6px 15px; border-radius: 20px;
-            font-size: 0.8rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            color: #d35400; border: 1px solid #e67e22;
-        }
-        .info-bar.connected { color: #27ae60; border-color: #2ecc71; }
-
-        .family-tag { background: #f1c40f; color: #000; padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; display: inline-block; margin-bottom: 5px; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: #eee; }
+        #map { height: 50vh; width: 100%; background: #ccc; }
+        .panel { height: 50vh; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: white; box-sizing: border-box; overflow-y: auto; }
+        input, button { padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        button { background: #27ae60; color: white; font-weight: bold; cursor: pointer; border: none; }
+        #log { font-size: 0.7rem; color: #444; background: #f9f9f9; padding: 10px; border: 1px solid #ddd; height: 80px; overflow-y: scroll; white-space: pre-wrap; }
+        .status-bar { font-weight: bold; font-size: 0.8rem; text-align: center; padding: 5px; color: orange; }
     </style>
 </head>
 <body>
 
-<div class="info-bar" id="netStatus">📡 Ağa Bağlanıyor...</div>
 <div id="map"></div>
+<div class="status-bar" id="netStat">📡 Sistem Başlatılıyor...</div>
 
-<div class="control-panel">
-    <div class="row">
-        <input type="password" id="familyKey" placeholder="🔑 Hane Şifresi (Ailenizle ortak kelime)" onchange="localStorage.setItem('f_key', this.value)">
-    </div>
-
-    <div class="status-container" id="statusList">
-        <div class="status-btn active" onclick="selectStatus('😊 İyiyim', '#2ecc71', this)">😊 İyiyim</div>
-        <div class="status-btn" onclick="selectStatus('🤒 Ziyaret', '#3498db', this)">🤒 Ziyaret</div>
-        <div class="status-btn" onclick="selectStatus('🆘 Acil', '#e74c3c', this)">🆘 Acil</div>
-        <div class="status-btn" onclick="selectStatus('🛠️ Destek', '#f39c12', this)">🛠️ Destek</div>
-    </div>
-
-    <div class="row">
-        <input type="text" id="userNote" placeholder="Kısa bir not yazın...">
-    </div>
-
-    <button class="publish-btn" onclick="handlePublish()">📍 DURUM YAYINLA</button>
-    <small style="text-align: center; font-size: 0.75rem; color: #7f8c8d;">Önce haritaya tıklayıp konumunuzu seçin.</small>
+<div class="panel">
+    <div id="log">Sistem günlükleri burada görünecek...</div>
+    <input type="password" id="fKey" placeholder="Hane Şifresi" onchange="localStorage.setItem('f_key', this.value)">
+    <input type="text" id="note" placeholder="Notunuz...">
+    <button id="pubBtn" onclick="publish()">📍 DURUMU YAYINLA</button>
+    <p style="font-size: 0.7rem; color: #666; margin: 0;">* Önce haritaya tıkla, sonra butona bas.</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+
 <script>
-    // --- 1. KİMLİK OLUŞTURMA ---
-    let myId = localStorage.getItem('s_id');
-    if (!myId) {
-        myId = 's_' + Math.random().toString(36).substr(2, 10);
-        localStorage.setItem('s_id', myId);
-    }
-    document.getElementById('familyKey').value = localStorage.getItem('f_key') || '';
+    const logger = (msg) => {
+        const logEl = document.getElementById('log');
+        logEl.innerText += "\n> " + msg;
+        logEl.scrollTop = logEl.scrollHeight;
+    };
 
-    let currentStatus = '😊 İyiyim';
-    let currentColor = '#2ecc71';
-    let manualCoord = null;
-    let tempMarker = null;
+    window.onerror = (m, u, l) => logger("HATA: " + m + " (Satır: " + l + ")");
 
-    // --- 2. HARİTA AYARLARI ---
-    const map = L.map('map').setView([39.93, 32.85], 5);
+    let targetCoord = null;
+    const myId = localStorage.getItem('s_id') || 'u' + Math.random().toString(36).substr(2, 5);
+    localStorage.setItem('s_id', myId);
+    document.getElementById('fKey').value = localStorage.getItem('f_key') || '';
+
+    // 1. Harita Kurulumu
+    const map = L.map('map').setView([39.9, 32.8], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    logger("Harita yüklendi.");
 
-    // --- 3. MERKEZİYETSİZ AĞ BAĞLANTISI (P2P) ---
-    const gun = Gun({
-        peers: [
-            'https://gun-manhattan.herokuapp.com/gun',
-            'https://relay.peer.ooo/gun'
-        ],
-        localStorage: true // Veriyi tarayıcıda yedekle
+    map.on('click', e => {
+        targetCoord = e.latlng;
+        L.popup().setLatLng(e.latlng).setContent("📍 Konum Seçildi").openOn(map);
+        logger("Konum seçildi: " + e.latlng.lat.toFixed(4));
     });
-    
-    // Veritabanı Kanalı (İsmi değiştirmeyin, iki cihaz aynı kanalda olmalı)
-    const db = gun.get('sivil_mahalle_kanal_v3');
+
+    // 2. Gun.js Kurulumu
+    let db;
+    try {
+        const gun = Gun(['https://gunjs.herokuapp.com/gun']);
+        db = gun.get('sivil_v3_test');
+        gun.on('hi', () => {
+            document.getElementById('netStat').innerText = "✅ AĞA BAĞLANDI";
+            document.getElementById('netStat').style.color = "green";
+            logger("Ağa başarıyla bağlanıldı.");
+        });
+    } catch(e) {
+        logger("Gun.js başlatılamadı: " + e.message);
+    }
+
+    // 3. Veri Dinleme
     const markers = {};
-
-    gun.on('hi', () => {
-        const statusEl = document.getElementById('netStatus');
-        statusEl.innerText = "⚡ Sivil Ağa Bağlı";
-        statusEl.classList.add('connected');
-    });
-
-    // --- 4. HARİTAYA TIKLAMA ---
-    map.on('click', (e) => {
-        manualCoord = e.latlng;
-        if (tempMarker) map.removeLayer(tempMarker);
-        
-        tempMarker = L.marker(manualCoord).addTo(map)
-            .bindPopup("📍 Hedef konum seçildi. Şimdi 'Yayınla' butonuna basın.")
-            .openPopup();
-    });
-
-    // --- 5. AĞI DİNLE VE PİNLERİ YERLEŞTİR ---
     db.map().on((data, id) => {
-        if (!data || !data.lat) return;
-
-        const myFKey = localStorage.getItem('f_key');
-        const isFamily = (myFKey && data.fKey === myFKey && myFKey !== "");
-
-        const popupContent = `
-            ${isFamily ? '<span class="family-tag">🏠 AİLE ÜYESİ</span><br>' : ''}
-            <strong style="font-size:1.1rem; color:${data.color}">${data.status}</strong><br>
-            <div style="margin-top:5px; margin-bottom:5px;">${data.note || ''}</div>
-            <small style="color:#888">${new Date(data.time).toLocaleTimeString()}</small>
-        `;
-
-        if (markers[id]) {
-            markers[id].setLatLng([data.lat, data.lng]).setPopupContent(popupContent);
-            updateMarkerStyle(markers[id], data, isFamily);
+        if(!data || !data.lat) return;
+        const isF = (data.fKey && data.fKey === document.getElementById('fKey').value);
+        
+        if(markers[id]) {
+            markers[id].setLatLng([data.lat, data.lng]);
         } else {
-            const m = L.circleMarker([data.lat, data.lng]).addTo(map).bindPopup(popupContent);
-            updateMarkerStyle(m, data, isFamily);
-            markers[id] = m;
+            markers[id] = L.circleMarker([data.lat, data.lng], {
+                radius: isF ? 12 : 8,
+                fillColor: isF ? 'yellow' : 'blue',
+                fillOpacity: 0.8, color: '#000'
+            }).addTo(map).bindPopup(data.note || "İyiyim");
         }
     });
 
-    function updateMarkerStyle(m, data, isFamily) {
-        m.setStyle({
-            radius: isFamily ? 14 : 9,
-            fillColor: isFamily ? '#f1c40f' : data.color,
-            color: '#000',
-            weight: isFamily ? 3 : 2,
-            fillOpacity: 0.9
-        });
-        if(isFamily) m.bringToFront();
-    }
-
-    // --- 6. BUTON İŞLEMLERİ ---
-    function selectStatus(label, color, el) {
-        currentStatus = label;
-        currentColor = color;
-        document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function handlePublish() {
-        if (!manualCoord) {
-            alert("Lütfen önce harita üzerinde bir noktaya tıklayarak konumunuzu seçin!");
+    // 4. Yayınlama Fonksiyonu
+    function publish() {
+        logger("Butona basıldı...");
+        if(!targetCoord) {
+            alert("Lütfen önce haritaya tıklayarak bir nokta seçin!");
+            logger("Hata: Konum seçilmedi.");
             return;
         }
 
-        const fKey = document.getElementById('familyKey').value;
-        const note = document.getElementById('userNote').value;
-
-        // Veriyi P2P ağa yaz
-        db.get(myId).put({
-            lat: manualCoord.lat,
-            lng: manualCoord.lng,
-            status: currentStatus,
-            color: currentColor,
-            fKey: fKey,
-            note: note,
+        const payload = {
+            lat: targetCoord.lat,
+            lng: targetCoord.lng,
+            fKey: document.getElementById('fKey').value,
+            note: document.getElementById('note').value,
             time: Date.now()
-        }, (ack) => {
+        };
+
+        logger("Veri gönderiliyor...");
+        db.get(myId).put(payload, (ack) => {
             if(ack.err) {
-                alert("Yayınlanırken hata oluştu. İnternet bağlantınızı kontrol edin.");
+                logger("Gönderim Hatası: " + ack.err);
+                alert("Hata: " + ack.err);
             } else {
-                if (tempMarker) { map.removeLayer(tempMarker); manualCoord = null; }
-                document.getElementById('userNote').value = "";
-                alert("Sivil ağa gönderildi! Diğer cihazların görmesi birkaç saniye sürebilir.");
+                logger("BAŞARILI: Veri ağa fırlatıldı.");
+                alert("Durum yayınlandı! Diğer cihazdan kontrol edin.");
             }
         });
     }
 </script>
-
 </body>
 </html>
