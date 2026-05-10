@@ -3,115 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sivil Ağ V3 | Hata Ayıklama Modu</title>
+    <title>Sivil Mahalle V4</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: #eee; }
-        #map { height: 50vh; width: 100%; background: #ccc; }
-        .panel { height: 50vh; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: white; box-sizing: border-box; overflow-y: auto; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: #f4f4f9; overflow: hidden; }
+        #map { height: 60vh; width: 100%; }
+        .ui { height: 40vh; padding: 15px; display: flex; flex-direction: column; gap: 8px; background: white; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
         input, button { padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; width: 100%; box-sizing: border-box; }
-        button { background: #27ae60; color: white; font-weight: bold; cursor: pointer; border: none; }
-        #log { font-size: 0.7rem; color: #444; background: #f9f9f9; padding: 10px; border: 1px solid #ddd; height: 80px; overflow-y: scroll; white-space: pre-wrap; }
-        .status-bar { font-weight: bold; font-size: 0.8rem; text-align: center; padding: 5px; color: orange; }
+        button { background: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; }
+        #status { font-size: 0.75rem; text-align: center; color: #e67e22; font-weight: bold; padding: 5px; }
+        #log { font-size: 0.65rem; color: #666; height: 50px; overflow-y: auto; background: #f9f9f9; padding: 5px; border: 1px dotted #ccc; }
     </style>
 </head>
 <body>
 
+<div id="status">📡 AĞ ARANIYOR...</div>
 <div id="map"></div>
-<div class="status-bar" id="netStat">📡 Sistem Başlatılıyor...</div>
 
-<div class="panel">
-    <div id="log">Sistem günlükleri burada görünecek...</div>
-    <input type="password" id="fKey" placeholder="Hane Şifresi" onchange="localStorage.setItem('f_key', this.value)">
-    <input type="text" id="note" placeholder="Notunuz...">
-    <button id="pubBtn" onclick="publish()">📍 DURUMU YAYINLA</button>
-    <p style="font-size: 0.7rem; color: #666; margin: 0;">* Önce haritaya tıkla, sonra butona bas.</p>
+<div class="ui">
+    <div id="log">Sistem hazır. Önce haritaya tıkla.</div>
+    <input type="password" id="pass" placeholder="Aynı Şifreyi Girin (Örn: aile123)" onchange="localStorage.setItem('f_key', this.value)">
+    <input type="text" id="msg" placeholder="Kısa Not...">
+    <button onclick="send()">📍 DURUMU YAYINLA</button>
+    <small style="font-size: 0.7rem; color: #999; text-align: center;">Haritaya tıkla, pin belirince butona bas.</small>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 
 <script>
-    const logger = (msg) => {
-        const logEl = document.getElementById('log');
-        logEl.innerText += "\n> " + msg;
-        logEl.scrollTop = logEl.scrollHeight;
-    };
+    const print = (m) => { document.getElementById('log').innerText += "\n> " + m; };
+    let pos = null;
+    const uid = localStorage.getItem('s_id') || 'u' + Math.random().toString(36).substr(2, 5);
+    localStorage.setItem('s_id', uid);
+    document.getElementById('pass').value = localStorage.getItem('f_key') || '';
 
-    window.onerror = (m, u, l) => logger("HATA: " + m + " (Satır: " + l + ")");
-
-    let targetCoord = null;
-    const myId = localStorage.getItem('s_id') || 'u' + Math.random().toString(36).substr(2, 5);
-    localStorage.setItem('s_id', myId);
-    document.getElementById('fKey').value = localStorage.getItem('f_key') || '';
-
-    // 1. Harita Kurulumu
+    // Harita Kurulumu
     const map = L.map('map').setView([39.9, 32.8], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    logger("Harita yüklendi.");
 
     map.on('click', e => {
-        targetCoord = e.latlng;
-        L.popup().setLatLng(e.latlng).setContent("📍 Konum Seçildi").openOn(map);
-        logger("Konum seçildi: " + e.latlng.lat.toFixed(4));
+        pos = e.latlng;
+        L.popup().setLatLng(e.latlng).setContent("📍 Hedef Seçildi").openOn(map);
     });
 
-    // 2. Gun.js Kurulumu
-    let db;
-    try {
-        const gun = Gun(['https://gunjs.herokuapp.com/gun']);
-        db = gun.get('sivil_v3_test');
-        gun.on('hi', () => {
-            document.getElementById('netStat').innerText = "✅ AĞA BAĞLANDI";
-            document.getElementById('netStat').style.color = "green";
-            logger("Ağa başarıyla bağlanıldı.");
-        });
-    } catch(e) {
-        logger("Gun.js başlatılamadı: " + e.message);
-    }
+    // ÇOKLU KÖPRÜ (Relay) BAĞLANTISI
+    const gun = Gun({
+        peers: [
+            'https://gunjs.herokuapp.com/gun',
+            'https://gun-manhattan.herokuapp.com/gun',
+            'https://relay.peer.ooo/gun',
+            'https://dletta.herokuapp.com/gun'
+        ]
+    });
 
-    // 3. Veri Dinleme
+    const root = gun.get('sivil_mahalle_v4_final');
     const markers = {};
-    db.map().on((data, id) => {
-        if(!data || !data.lat) return;
-        const isF = (data.fKey && data.fKey === document.getElementById('fKey').value);
-        
-        if(markers[id]) {
-            markers[id].setLatLng([data.lat, data.lng]);
-        } else {
-            markers[id] = L.circleMarker([data.lat, data.lng], {
-                radius: isF ? 12 : 8,
-                fillColor: isF ? 'yellow' : 'blue',
-                fillOpacity: 0.8, color: '#000'
-            }).addTo(map).bindPopup(data.note || "İyiyim");
-        }
+
+    gun.on('hi', () => {
+        document.getElementById('status').innerText = "✅ SİVİL AĞA BAĞLANDI";
+        document.getElementById('status').style.color = "green";
+        print("Bir köprüye bağlanıldı.");
     });
 
-    // 4. Yayınlama Fonksiyonu
-    function publish() {
-        logger("Butona basıldı...");
-        if(!targetCoord) {
-            alert("Lütfen önce haritaya tıklayarak bir nokta seçin!");
-            logger("Hata: Konum seçilmedi.");
-            return;
-        }
+    // VERİ DİNLEME
+    root.map().on((d, id) => {
+        if(!d || !d.lat) return;
+        const myPass = document.getElementById('pass').value;
+        const isFamily = (myPass && d.pass === myPass);
 
-        const payload = {
-            lat: targetCoord.lat,
-            lng: targetCoord.lng,
-            fKey: document.getElementById('fKey').value,
-            note: document.getElementById('note').value,
-            time: Date.now()
+        const content = `<b>${d.msg || 'İyiyim'}</b><br><small>${new Date(d.t).toLocaleTimeString()}</small>`;
+
+        if(markers[id]) {
+            markers[id].setLatLng([d.lat, d.lng]).setPopupContent(content);
+        } else {
+            markers[id] = L.circleMarker([d.lat, d.lng], {
+                radius: isFamily ? 12 : 8,
+                fillColor: isFamily ? 'yellow' : '#3498db',
+                fillOpacity: 0.8, color: '#000', weight: 2
+            }).addTo(map).bindPopup(content);
+            print("Yeni kişi göründü!");
+        }
+        if(isFamily) markers[id].bringToFront();
+    });
+
+    // YAYINLAMA
+    function send() {
+        if(!pos) { alert("Önce haritaya tıkla!"); return; }
+        
+        const data = {
+            lat: pos.lat, lng: pos.lng,
+            pass: document.getElementById('pass').value,
+            msg: document.getElementById('msg').value,
+            t: Date.now()
         };
 
-        logger("Veri gönderiliyor...");
-        db.get(myId).put(payload, (ack) => {
-            if(ack.err) {
-                logger("Gönderim Hatası: " + ack.err);
-                alert("Hata: " + ack.err);
-            } else {
-                logger("BAŞARILI: Veri ağa fırlatıldı.");
-                alert("Durum yayınlandı! Diğer cihazdan kontrol edin.");
+        print("Gönderiliyor...");
+        root.get(uid).put(data, (ack) => {
+            if(ack.err) print("Hata: " + ack.err);
+            else {
+                alert("Yayınlandı! Diğer cihazda görünmesi için 10 sn bekleyin.");
+                print("Veri ağa fırlatıldı.");
             }
         });
     }
