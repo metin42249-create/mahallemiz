@@ -3,108 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sivil Mahalle V5 - Kesin Bağlantı</title>
+    <title>Sivil Mahalle V6 | Klasik Görünüm</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: #1a1a1d; color: white; overflow: hidden; }
-        #map { height: 65vh; width: 100%; filter: grayscale(0.5) contrast(1.2); }
-        .ui { height: 35vh; padding: 15px; background: #222; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
-        input { background: #333; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; font-size: 1rem; }
-        button { background: #d32f2f; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        #log { font-size: 0.7rem; color: #aaa; background: #111; padding: 8px; border-radius: 5px; height: 60px; overflow-y: auto; border: 1px solid #333; }
-        #status { text-align: center; font-size: 0.8rem; font-weight: bold; padding: 5px; color: #f1c40f; }
+        :root { --main-bg: #f8f9fa; --panel-bg: #ffffff; --accent: #2980b9; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--main-bg); overflow: hidden; }
+        
+        #map { height: 60vh; width: 100%; z-index: 1; }
+        
+        .ui-panel { 
+            height: 40vh; background: var(--panel-bg); padding: 15px; 
+            display: flex; flex-direction: column; gap: 10px; box-sizing: border-box;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); position: relative; z-index: 1000;
+        }
+
+        .status-bar { 
+            font-size: 0.75rem; text-align: center; padding: 5px; 
+            background: #fff3cd; color: #856404; font-weight: bold; border-radius: 5px;
+        }
+        .status-bar.online { background: #d4edda; color: #155724; }
+
+        input { 
+            padding: 12px; border: 1px solid #ddd; border-radius: 8px; 
+            font-size: 1rem; width: 100%; box-sizing: border-box; outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        button { 
+            background: #27ae60; color: white; border: none; padding: 15px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;
+        }
+        button:active { transform: scale(0.98); }
+
+        #log { 
+            font-size: 0.65rem; color: #7f8c8d; height: 50px; 
+            overflow-y: auto; background: #fdfdfd; padding: 5px; 
+            border: 1px solid #eee; border-radius: 4px; white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
 
-<div id="status">📡 SİNYAL ARANIYOR...</div>
 <div id="map"></div>
 
-<div class="ui">
-    <div id="log">Sistem hazır. Lütfen önce haritada konum seçin.</div>
-    <input type="password" id="pass" placeholder="Ortak Hane Şifresi (Örn: akraba77)" onchange="localStorage.setItem('f_key', this.value)">
-    <input type="text" id="msg" placeholder="Mesajınız (İyiyiz, yardıma hazırız vb.)">
-    <button onclick="send()">📍 SİNYALİ GÖNDER</button>
+<div class="ui-panel">
+    <div id="status" class="status-bar">📡 AĞ ARANIYOR...</div>
+    <div id="log">Sistem başlatıldı. Lütfen haritaya tıklayın.</div>
+    
+    <input type="password" id="pass" placeholder="Anahtar Kelime (Ailenizle aynı yapın)" onchange="localStorage.setItem('f_key', this.value)">
+    <input type="text" id="msg" placeholder="Mesajınız...">
+    
+    <button onclick="publish()">📍 DURUMU YAYINLA</button>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-
 <script>
     const logger = (m) => { const el = document.getElementById('log'); el.innerText += "\n> " + m; el.scrollTop = el.scrollHeight; };
-    const myId = localStorage.getItem('s_id') || 'sivil_' + Math.random().toString(36).substr(2, 7);
+    const myId = localStorage.getItem('s_id') || 'u' + Math.random().toString(36).substr(2, 6);
     localStorage.setItem('s_id', myId);
     document.getElementById('pass').value = localStorage.getItem('f_key') || '';
 
-    let selectedPos = null;
-    const map = L.map('map').setView([39.9, 32.8], 6);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
-    map.on('click', e => {
-        selectedPos = e.latlng;
-        L.popup().setLatLng(e.latlng).setContent("📍 Sinyal Noktası Seçildi").openOn(map);
-        logger("Konum işaretlendi.");
-    });
-
-    // DAHA GÜÇLÜ VE ÇEŞİTLİ KÖPRÜLER (Relay List)
-    const gun = Gun({
-        peers: [
-            'https://gun-manhattan.herokuapp.com/gun',
-            'https://gun-us.herokuapp.com/gun',
-            'https://gunjs.herokuapp.com/gun',
-            'https://relay.peer.ooo/gun'
-        ]
-    });
-
-    // Kanal ismini benzersiz yaptık (kimseyle çakışmasın)
-    const channel = gun.get('metin_sivil_v5_final_bridge'); 
+    let selectedCoord = null;
     const markers = {};
 
-    gun.on('hi', () => {
-        document.getElementById('status').innerText = "✅ SİNYAL KULESİNE BAĞLANDI";
-        document.getElementById('status').style.color = "#2ecc71";
-        logger("Bir buluşma noktasına ulaşıldı.");
+    // 1. Haritayı Başlat
+    const map = L.map('map').setView([39.9, 32.8], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    map.on('click', e => {
+        selectedCoord = e.latlng;
+        L.popup().setLatLng(e.latlng).setContent("📍 Konum İşaretlendi").openOn(map);
+        logger("Konum seçildi.");
     });
 
-    // VERİ DİNLEME (Çok daha agresif)
+    // 2. Yeni Sivil Relay Bağlantısı
+    const gun = Gun(['https://p2p.twit.ge/gun']);
+    const channel = gun.get('sivil_mahalle_v6_final');
+
+    gun.on('hi', () => {
+        const s = document.getElementById('status');
+        s.innerText = "✅ SİVİL AĞA BAĞLI";
+        s.className = "status-bar online";
+        logger("Buluşma noktasına erişildi.");
+    });
+
+    // 3. Veri Dinleme
     channel.map().on((data, id) => {
         if(!data || !data.lat) return;
         
         const myPass = document.getElementById('pass').value;
-        const isFamily = (myPass && data.pass === myPass);
+        const isFamily = (myPass && data.pass === myPass && myPass !== "");
 
-        const popupText = `<b>${data.msg || 'Sinyal'}</b><br><small>${new Date(data.time).toLocaleTimeString()}</small>`;
+        const content = `<b>${data.msg || 'Sinyal'}</b><br><small>${new Date(data.t).toLocaleTimeString()}</small>`;
 
         if(markers[id]) {
-            markers[id].setLatLng([data.lat, data.lng]).setPopupContent(popupText);
+            markers[id].setLatLng([data.lat, data.lng]).setPopupContent(content);
         } else {
             markers[id] = L.circleMarker([data.lat, data.lng], {
-                radius: isFamily ? 15 : 10,
+                radius: isFamily ? 12 : 8,
                 fillColor: isFamily ? '#f1c40f' : '#3498db',
-                fillOpacity: 0.9, color: 'white', weight: 2
-            }).addTo(map).bindPopup(popupText);
-            logger("Yeni sinyal yakalandı!");
+                fillOpacity: 0.8, color: '#000', weight: 2
+            }).addTo(map).bindPopup(content);
+            logger("Yeni bir kullanıcı görüldü!");
         }
     });
 
-    // GÖNDERME FONKSİYONU
-    function send() {
-        if(!selectedPos) { alert("Lütfen önce haritaya tıklayın!"); return; }
-        
-        const packet = {
-            lat: selectedPos.lat,
-            lng: selectedPos.lng,
+    // 4. Yayınlama
+    function publish() {
+        if(!selectedCoord) {
+            alert("Lütfen önce haritaya tıklayıp konumunuzu seçin!");
+            return;
+        }
+
+        const payload = {
+            lat: selectedCoord.lat,
+            lng: selectedCoord.lng,
             pass: document.getElementById('pass').value,
             msg: document.getElementById('msg').value,
-            time: Date.now()
+            t: Date.now()
         };
 
-        logger("Sinyal fırlatılıyor...");
-        channel.get(myId).put(packet, (ack) => {
-            if(ack.err) logger("HATA: " + ack.err);
+        logger("Gönderiliyor...");
+        channel.get(myId).put(payload, (ack) => {
+            if(ack.err) logger("Hata: " + ack.err);
             else {
-                alert("Sinyal Yayında!");
-                logger("Sinyal ağda yankılanıyor...");
+                alert("Durumunuz Başarıyla Yayınlandı!");
+                logger("Veri ağa fırlatıldı.");
             }
         });
     }
