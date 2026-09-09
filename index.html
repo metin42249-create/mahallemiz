@@ -2,91 +2,351 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sivil Mahalle Ağı | Özel Durak</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manevi Yoldaş & Sünnet Rehberi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --p: #2c3e50; --s: #27ae60; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: #f4f7f6; overflow: hidden; }
-        #map { height: 60vh; width: 100%; border-bottom: 2px solid #ddd; }
-        .ui { height: 40vh; background: white; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-sizing: border-box; box-shadow: 0 -3px 10px rgba(0,0,0,0.1); }
-        .status { font-size: 0.8rem; font-weight: bold; text-align: center; padding: 6px; border-radius: 5px; background: #fff3cd; color: #856404; }
-        .status.ok { background: #d4edda; color: #155724; }
-        input, button { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 1rem; width: 100%; box-sizing: border-box; }
-        button { background: var(--s); color: white; border: none; font-weight: bold; cursor: pointer; }
-        #log { font-size: 0.7rem; color: #7f8c8d; height: 45px; overflow-y: auto; background: #fdfdfd; padding: 5px; border: 1px solid #eee; border-radius: 4px; }
+        :root {
+            --bg-color: #f4f6f8;
+            --chat-bg: #ffffff;
+            --primary: #1b4332;
+            --primary-light: #2d6a4f;
+            --user-msg: #e8f5e9;
+            --bot-msg: #f8f9fa;
+            --text-color: #2b2d42;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px; /* Okunabilirlik için biraz genişletildi */
+            background: var(--chat-bg);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .setup-panel {
+            padding: 18px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 160px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        input, select, button {
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.2);
+        }
+
+        button.btn-primary {
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--primary);
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            line-height: 1.6;
+            user-select: text;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 0.98rem;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-msg);
+            border: 1px solid #c8e6c9;
+            border-bottom-right-radius: 2px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-msg);
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 2px;
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            background-color: #fff;
+        }
+
+        .input-area input {
+            flex: 1;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-<div id="map"></div>
-<div class="ui">
-    <div id="stat" class="status">📡 KENDİ DURAĞINA BAĞLANILIYOR...</div>
-    <div id="log">Sistem hazır. Önce haritaya tıklayın.</div>
-    <input type="password" id="pass" placeholder="🔑 Ortak Hane Şifresi" onchange="localStorage.setItem('f_key', this.value)">
-    <input type="text" id="note" placeholder="Notunuz...">
-    <button onclick="send()">📍 DURUMU YAYINLA</button>
+<div class="container">
+    <header>
+        <h1><i class="fa-solid fa-moon"></i> Manevi Yoldaş & Rehber</h1>
+        <button class="toggle-btn" onclick="toggleSetup()" title="Ayarları Göster/Gizle">
+            <i class="fa-solid fa-sliders"></i>
+        </button>
+    </header>
+
+    <div class="setup-panel" id="setupPanel">
+        <div class="form-group">
+            <label for="apiKey">Gemini API Key:</label>
+            <input type="password" id="apiKey" placeholder="AIzaSy...">
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="city">Şehir:</label>
+                <input type="text" id="city" value="İstanbul">
+            </div>
+            <div class="form-group">
+                <label for="environment">Bulunduğunuz Ortam:</label>
+                <select id="environment">
+                    <option value="Ev">Ev</option>
+                    <option value="İş Yeri / Ofis">İş Yeri / Ofis</option>
+                    <option value="Okul / Üniversite">Okul / Üniversite</option>
+                    <option value="Yolculuk / Yolda">Yolculuk / Yolda</option>
+                    <option value="Cami / İbadethane">Cami / İbadethane</option>
+                    <option value="Sosyal Ortam / Dışarıda">Sosyal Ortam / Dışarıda</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="occupation">Meslek / Okul / Şu Anki Meşguliyet:</label>
+            <input type="text" id="occupation" placeholder="Örn: Yemek yiyorum, Çalışıyorum, Ders dinliyorum vb.">
+        </div>
+
+        <button class="btn-primary" id="startBtn" onclick="initChat()">
+            <i class="fa-solid fa-handshake"></i> Yoldaşlığı Başlat
+        </button>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+        <div class="message bot-message">
+            Durumunuzu ve şu anki meşguliyetinizi doldurup "Yoldaşlığı Başlat" butonuna basarak sohbete başlayabilirsiniz.
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Şu an ne yapıyorsun veya ne sormak istersin?" disabled onkeypress="handleKeyPress(event)">
+        <button class="btn-primary" id="sendBtn" onclick="sendMessage()" disabled>Gönder</button>
+    </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const logger = (m) => { const e = document.getElementById('log'); e.innerText += "\n> " + m; e.scrollTop = e.scrollHeight; };
-    const myId = localStorage.getItem('s_id') || 'u' + Math.random().toString(36).substr(2, 6);
-    localStorage.setItem('s_id', myId);
-    document.getElementById('pass').value = localStorage.getItem('f_key') || '';
+    let chatHistory = [];
+    let apiKey = "";
 
-    let pos = null;
-    const markers = {};
+    window.onload = () => {
+        const savedKey = localStorage.getItem("gemini_api_key");
+        if (savedKey) document.getElementById("apiKey").value = savedKey;
+    };
 
-    const map = L.map('map').setView([39.9, 32.8], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    function toggleSetup() {
+        const panel = document.getElementById("setupPanel");
+        panel.style.display = panel.style.display === "none" ? "flex" : "none";
+    }
 
-    map.on('click', e => {
-        pos = e.latlng;
-        L.popup().setLatLng(e.latlng).setContent("📍 Seçildi").openOn(map);
-        logger("Konum seçildi.");
-    });
+    async function initChat() {
+        apiKey = document.getElementById("apiKey").value.trim();
+        const city = document.getElementById("city").value.trim();
+        const environment = document.getElementById("environment").value;
+        const occupation = document.getElementById("occupation").value.trim() || "Günlük meşguliyet";
 
-    // KENDİ BİLGİSAYARINDAKİ NODE.JS DURAĞINA BAĞLANIR
-    const gun = Gun({
-        peers: ['http://192.168.1.100:8080/gun']
-    });
-
-    const channel = gun.get('sivil_ozel_durak_v8');
-
-    gun.on('hi', () => {
-        const s = document.getElementById('stat');
-        s.innerText = "✅ KENDİ DURAĞINA BAĞLI";
-        s.className = "status ok";
-        logger("Yerel durakla el sıkışıldı.");
-    });
-
-    channel.map().on((data, id) => {
-        if(!data || !data.lat) return;
-        const pk = document.getElementById('pass').value;
-        const fam = (pk && data.pass === pk && pk !== "");
-        const info = `<b>${data.msg || 'Sinyal'}</b><br><small>${new Date(data.t).toLocaleTimeString()}</small>`;
-
-        if(markers[id]) {
-            markers[id].setLatLng([data.lat, data.lng]).setPopupContent(info);
-        } else {
-            markers[id] = L.circleMarker([data.lat, data.lng], {
-                radius: fam ? 12 : 8, fillColor: fam ? '#f1c40f' : '#3498db',
-                fillOpacity: 0.8, color: '#000', weight: 2
-            }).addTo(map).bindPopup(info);
-            logger("Ağda yeni veri belirdi.");
+        if (!apiKey) {
+            alert("Lütfen geçerli bir Gemini API Key giriniz.");
+            return;
         }
-    });
 
-    function send() {
-        if(!pos) { alert("Haritaya tıkla!"); return; }
-        const p = { lat: pos.lat, lng: pos.lng, pass: document.getElementById('pass').value, msg: document.getElementById('note').value, t: Date.now() };
-        channel.get(myId).put(p, (ack) => {
-            if(ack.err) logger("Hata: " + ack.err);
-            else { alert("Yayınlandı!"); logger("Veri iletildi."); }
-        });
+        localStorage.setItem("gemini_api_key", apiKey);
+
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // MANEVİ YOLDAŞLIK - GELİŞMİŞ KARAKTER PROMPTU
+        const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, kullanıcıya yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
+
+Kullanıcının Mevcut Durumu:
+- Şehir: ${city}
+- Tarih / Gün: ${dateString}
+- Yerel Saat: ${timeString}
+- Bulunduğu Ortam: ${environment}
+- Şu Anki Meşguliyeti: ${occupation}
+
+Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
+1. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen gibi değil, o an kullanıcının yanında olan bir dost/sahabe gibi "Gel seninle şöyle yapalım", "Hadi gel niyetimizi şöyle düzeltelim" şeklinde konuş.
+2. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa (yemek yemek, çalışmak, yürümek) "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun sadece fiziksel hareketlerini değil, Allah'a karşı "korku ve ümit (havf ve reca)" içindeki o derin hissiyatını, insanlara ve nimete karşı bakış açısını anlat. 
+3. AŞAMALI SÜNNET UYGULAMASI: Kullanıcının eylemini Durum Öncesi, Durum Sırası ve Durum Sonrası olarak böl. Örneğin yemek yiyorsa; öncesinde niyet ve tefekkür, sırasında edep ve helal lokma bilinci, sonrasında şükür ve acziyet boyutunu aktar.
+4. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde kullanıcının takınması gereken "edep, terbiye, güzel ahlak, tevazu, sabır, azim, merhamet" gibi insani değerleri tek tek vurgula. Sadece bir işi yapmasını değil, o işi yaparken hangi ahlaka bürünmesi gerektiğini hatırlat.
+5. KUR'AN VE SÜNNET TEMSİLİ: Kur'an'ın ve Peygamberimizin o anki yaşam biçimini nasıl inşa ettiğini vurgula. Yaşanan o anı (çalışmak, yemek, yürümek) nasıl bir ibadete çevirebileceklerini göster.
+
+İlk mesajında kullanıcının meşguliyetini, ortamını ve saatini baz alarak ona samimi bir "hoş geldin" de ve şu an içinde bulunduğu duruma dair "Gel beraber Peygamberimizin sünnetiyle bu anı bereketlendirelim" diyerek konuya gir.`;
+
+        document.getElementById("chatArea").innerHTML = "";
+        document.getElementById("userInput").disabled = false;
+        document.getElementById("sendBtn").disabled = false;
+        document.getElementById("setupPanel").style.display = "none";
+
+        chatHistory = [{ role: "user", parts: [{ text: systemPrompt }] }];
+
+        appendMessage("Manevi yoldaşınızla bağlantı kuruluyor...", "bot-message");
+        await fetchGeminiResponse();
+    }
+
+    async function fetchGeminiResponse() {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: chatHistory })
+            });
+
+            const data = await response.json();
+
+            if (data.error) throw new Error(data.error.message || "Hata oluştu.");
+
+            // Gemini yanıtlarında Markdown (*) kullanır, bunu basitçe temizleyip veya satır atlamalarını koruyarak ekliyoruz.
+            let botReply = data.candidates[0].content.parts[0].text;
+            
+            chatHistory.push({ role: "model", parts: [{ text: botReply }] });
+
+            const chatArea = document.getElementById("chatArea");
+            if (chatArea.lastChild && chatArea.lastChild.textContent.includes("bağlantı kuruluyor")) {
+                chatArea.removeChild(chatArea.lastChild);
+            }
+            if (chatArea.lastChild && chatArea.lastChild.textContent.includes("Düşünüyor...")) {
+                chatArea.removeChild(chatArea.lastChild);
+            }
+
+            appendMessage(botReply, "bot-message");
+
+        } catch (error) {
+            appendMessage("Hata oluştu: " + error.message, "bot-message");
+        }
+    }
+
+    async function sendMessage() {
+        const inputField = document.getElementById("userInput");
+        const userText = inputField.value.trim();
+
+        if (!userText) return;
+
+        appendMessage(userText, "user-message");
+        inputField.value = "";
+
+        chatHistory.push({ role: "user", parts: [{ text: userText }] });
+
+        appendMessage("Düşünüyor...", "bot-message");
+        await fetchGeminiResponse();
+    }
+
+    function appendMessage(text, className) {
+        const chatArea = document.getElementById("chatArea");
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `message ${className}`;
+        
+        // Gelen metindeki kalın yazıları HTML'e çevirme (basit Markdown desteği)
+        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        msgDiv.innerHTML = formattedText;
+        
+        chatArea.appendChild(msgDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === "Enter") sendMessage();
     }
 </script>
+
 </body>
 </html>
