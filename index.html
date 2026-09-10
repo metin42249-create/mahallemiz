@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanal Hoca & Sünnet Rehberi</title>
+    <title>Manevi Yoldaş & Sünnet Rehberi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Markdown formatını düzgün işlemek için kütüphane -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
@@ -75,6 +74,28 @@
 
         .icon-btn:hover {
             opacity: 1;
+        }
+
+        .info-panel {
+            background-color: #eef5f1;
+            border-bottom: 1px solid #c8e6c9;
+            padding: 16px 20px;
+            font-size: 0.9rem;
+            color: #1b4332;
+            line-height: 1.5;
+        }
+
+        .info-panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-panel ul {
+            margin: 6px 0 0 0;
+            padding-left: 20px;
         }
 
         .setup-panel {
@@ -184,7 +205,6 @@
             flex: 1;
         }
 
-        /* Yükleniyor Efekti */
         .typing-indicator {
             display: flex;
             gap: 4px;
@@ -208,7 +228,6 @@
             40% { transform: scale(1.0); }
         }
 
-        /* Özel Kaydırma Çubuğu */
         .chat-area::-webkit-scrollbar { width: 6px; }
         .chat-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
@@ -217,8 +236,11 @@
 
 <div class="container">
     <header>
-        <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka - Google ai</h1>
+        <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka - Google Gemini</h1>
         <div class="header-actions">
+            <button class="icon-btn" onclick="toggleInfo()" title="Nedir / Nasıl Kullanılır?">
+                <i class="fa-solid fa-circle-info"></i>
+            </button>
             <button class="icon-btn" onclick="resetChat()" title="Sohbeti Sıfırla">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
@@ -227,6 +249,18 @@
             </button>
         </div>
     </header>
+
+    <div class="info-panel" id="infoPanel" style="display: none;">
+        <h3><i class="fa-solid fa-seedling"></i> Bu Uygulama Nedir?</h3>
+        <p>Bu araç; yemek yerken, çalışırken veya yoldayken o anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini, güzel ahlakını ve manevi farkındalığı samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
+        
+        <h3 style="margin-top: 12px;"><i class="fa-solid fa-list-check"></i> Nasıl Kullanılır?</h3>
+        <ul>
+            <li><strong>API Anahtarı:</strong> Google AI Studio'dan ücretsiz bir Gemini API Key alıp yapıştırın. <em>(Anahtarınız sadece kendi tarayıcınızda kalır.)</em></li>
+            <li><strong>Konum ve Durum:</strong> Bulunduğunuz şehri, ortamı ve o an ne yaptığınızı (örn: <i>Yemek yiyorum</i>) girin.</li>
+            <li><strong>Başlatın:</strong> "Sohbet et" butonuna tıklayarak o anınıza özel manevi tavsiyeler alın.</li>
+        </ul>
+    </div>
 
     <div class="setup-panel" id="setupPanel">
         <div class="form-group">
@@ -288,6 +322,11 @@
         panel.style.display = panel.style.display === "none" ? "flex" : "none";
     }
 
+    function toggleInfo() {
+        const panel = document.getElementById("infoPanel");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+
     function resetChat() {
         if (confirm("Sohbet geçmişi temizlensin mi?")) {
             chatHistory = [];
@@ -340,6 +379,7 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
         document.getElementById("userInput").disabled = false;
         document.getElementById("sendBtn").disabled = false;
         document.getElementById("setupPanel").style.display = "none";
+        document.getElementById("infoPanel").style.display = "none";
         document.getElementById("userInput").focus();
 
         chatHistory = [{ role: "user", parts: [{ text: systemPrompt }] }];
@@ -394,7 +434,6 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${className}`;
         
-        // Markdown dönüşümü
         msgDiv.innerHTML = marked.parse(text);
         
         chatArea.appendChild(msgDiv);
