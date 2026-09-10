@@ -252,22 +252,16 @@
 
     <div class="info-panel" id="infoPanel" style="display: none;">
         <h3><i class="fa-solid fa-seedling"></i> Bu Uygulama Nedir?</h3>
-        <p>Bu araç; yemek yerken, çalışırken veya yoldayken o anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini, güzel ahlakını ve manevi farkındalığı samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir. Anlam bütünlüğünü korur ama bazen kelime hataları yapabilir.</p>
+        <p>Bu araç; yemek yerken, çalışırken veya yoldayken o anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini, güzel ahlakını ve manevi farkındalığı samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
         
         <h3 style="margin-top: 12px;"><i class="fa-solid fa-list-check"></i> Nasıl Kullanılır?</h3>
         <ul>
-            <li><strong>API Anahtarı:</strong> Google AI Studio'dan ücretsiz bir Gemini API Key alıp yapıştırın. <em>(Anahtarınız sadece kendi tarayıcınızda kalır.)</em></li>
             <li><strong>Konum ve Durum:</strong> Bulunduğunuz şehri, ortamı ve o an ne yaptığınızı (örn: <i>Yemek yiyorum</i>) girin.</li>
             <li><strong>Başlatın:</strong> "Sohbet et" butonuna tıklayarak o anınıza özel manevi tavsiyeler alın.</li>
         </ul>
     </div>
 
     <div class="setup-panel" id="setupPanel">
-        <div class="form-group">
-            <label for="apiKey">Gemini API Key:</label>
-            <input type="password" id="apiKey" placeholder="AIzaSy...">
-        </div>
-        
         <div class="form-row">
             <div class="form-group">
                 <label for="city">Şehir:</label>
@@ -310,12 +304,6 @@
 
 <script>
     let chatHistory = [];
-    let apiKey = "";
-
-    window.onload = () => {
-        const savedKey = localStorage.getItem("gemini_api_key");
-        if (savedKey) document.getElementById("apiKey").value = savedKey;
-    };
 
     function toggleSetup() {
         const panel = document.getElementById("setupPanel");
@@ -341,17 +329,9 @@
     }
 
     async function initChat() {
-        apiKey = document.getElementById("apiKey").value.trim();
         const city = document.getElementById("city").value.trim();
         const environment = document.getElementById("environment").value;
         const occupation = document.getElementById("occupation").value.trim() || "Günlük meşguliyet";
-
-        if (!apiKey) {
-            alert("Lütfen geçerli bir Gemini API Key giriniz.");
-            return;
-        }
-
-        localStorage.setItem("gemini_api_key", apiKey);
 
         const now = new Date();
         const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
@@ -389,7 +369,7 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
     }
 
     async function fetchGeminiResponse() {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`;
+        const url = '/api/gemini';
 
         try {
             const response = await fetch(url, {
@@ -401,7 +381,7 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
             const data = await response.json();
             removeLoadingIndicator();
 
-            if (data.error) throw new Error(data.error.message || "Hata oluştu.");
+            if (data.error) throw new Error(typeof data.error === 'string' ? data.error : (data.error.message || "Hata oluştu."));
 
             let botReply = data.candidates[0].content.parts[0].text;
             chatHistory.push({ role: "model", parts: [{ text: botReply }] });
