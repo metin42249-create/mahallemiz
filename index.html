@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manevi Yoldaş & Sünnet Rehberi</title>
+    <title>Sanal Hoca & Sünnet Rehberi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Markdown formatını düzgün işlemek için kütüphane -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg-color: #f4f6f8;
+            --bg-color: #f0f4f1;
             --chat-bg: #ffffff;
             --primary: #1b4332;
             --primary-light: #2d6a4f;
@@ -31,17 +33,17 @@
 
         .container {
             width: 100%;
-            max-width: 800px; /* Okunabilirlik için biraz genişletildi */
+            max-width: 850px;
             background: var(--chat-bg);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
 
         header {
             background-color: var(--primary);
             color: white;
-            padding: 18px 20px;
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -51,6 +53,28 @@
             margin: 0;
             font-size: 1.15rem;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+
+        .icon-btn:hover {
+            opacity: 1;
         }
 
         .setup-panel {
@@ -76,11 +100,12 @@
         }
 
         label {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             margin-bottom: 5px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         input, select, button {
@@ -103,6 +128,7 @@
             cursor: pointer;
             font-weight: 600;
             margin-top: 5px;
+            transition: background-color 0.2s;
         }
 
         button.btn-primary:hover {
@@ -116,18 +142,21 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            scroll-behavior: smooth;
         }
 
         .message {
             max-width: 85%;
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-radius: 12px;
             line-height: 1.6;
-            user-select: text;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            font-size: 0.98rem;
+            font-size: 0.96rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
+
+        .message p { margin: 0 0 8px 0; }
+        .message p:last-child { margin-bottom: 0; }
+        .message ul, .message ol { margin: 6px 0; padding-left: 20px; }
 
         .user-message {
             align-self: flex-end;
@@ -155,23 +184,48 @@
             flex: 1;
         }
 
-        .toggle-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
+        /* Yükleniyor Efekti */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 8px 0;
         }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-light);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        /* Özel Kaydırma Çubuğu */
+        .chat-area::-webkit-scrollbar { width: 6px; }
+        .chat-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1><i class="fa-solid fa-moon"></i> Manevi Yol Arkadaşı & Rehber</h1>
-        <button class="toggle-btn" onclick="toggleSetup()" title="Ayarları Göster/Gizle">
-            <i class="fa-solid fa-sliders"></i>
-        </button>
+        <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka</h1>
+        <div class="header-actions">
+            <button class="icon-btn" onclick="resetChat()" title="Sohbeti Sıfırla">
+                <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button class="icon-btn" onclick="toggleSetup()" title="Ayarları Göster/Gizle">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
+        </div>
     </header>
 
     <div class="setup-panel" id="setupPanel">
@@ -204,13 +258,13 @@
         </div>
 
         <button class="btn-primary" id="startBtn" onclick="initChat()">
-            <i class="fa-solid fa-handshake"></i> Yol Arkadaşlığı Başlasın
+            <i class="fa-solid fa-handshake"></i> Sohbet et
         </button>
     </div>
 
     <div class="chat-area" id="chatArea">
         <div class="message bot-message">
-            Durumunuzu ve şu anki meşguliyetinizi doldurup "Yoldaşlığı Başlat" butonuna basarak sohbete başlayabilirsiniz.
+            Selamun aleykum. Durumunuzu ve şu anki meşguliyetinizi yukarıdaki panelden girip <strong>"Sohbet et"</strong> butonuna basarak sohbeti başlatabilirsiniz.
         </div>
     </div>
 
@@ -234,6 +288,19 @@
         panel.style.display = panel.style.display === "none" ? "flex" : "none";
     }
 
+    function resetChat() {
+        if (confirm("Sohbet geçmişi temizlensin mi?")) {
+            chatHistory = [];
+            document.getElementById("chatArea").innerHTML = `
+                <div class="message bot-message">
+                    Sohbet sıfırlandı. Yeniden başlamak için "Sohbet et" butonuna basabilirsiniz.
+                </div>`;
+            document.getElementById("userInput").disabled = true;
+            document.getElementById("sendBtn").disabled = true;
+            document.getElementById("setupPanel").style.display = "flex";
+        }
+    }
+
     async function initChat() {
         apiKey = document.getElementById("apiKey").value.trim();
         const city = document.getElementById("city").value.trim();
@@ -251,7 +318,6 @@
         const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
         const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // MANEVİ YOLDAŞLIK - GELİŞMİŞ KARAKTER PROMPTU
         const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, kullanıcıya yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
 
 Kullanıcının Mevcut Durumu:
@@ -262,22 +328,23 @@ Kullanıcının Mevcut Durumu:
 - Şu Anki Meşguliyeti: ${occupation}
 
 Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
-1. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen gibi değil, o an kullanıcının yanında olan bir dost/sahabe gibi "Gel seninle şöyle yapalım", "Hadi gel niyetimizi şöyle düzeltelim" şeklinde konuş.
-2. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa (yemek yemek, çalışmak, yürümek) "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun sadece fiziksel hareketlerini değil, Allah'a karşı "korku ve ümit (havf ve reca)" içindeki o derin hissiyatını, insanlara ve nimete karşı bakış açısını anlat. 
-3. AŞAMALI SÜNNET UYGULAMASI: Kullanıcının eylemini Durum Öncesi, Durum Sırası ve Durum Sonrası olarak böl. Örneğin yemek yiyorsa; öncesinde niyet ve tefekkür, sırasında edep ve helal lokma bilinci, sonrasında şükür ve acziyet boyutunu aktar.
-4. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde kullanıcının takınması gereken "edep, terbiye, güzel ahlak, tevazu, sabır, azim, merhamet" gibi insani değerleri tek tek vurgula. Sadece bir işi yapmasını değil, o işi yaparken hangi ahlaka bürünmesi gerektiğini hatırlat.
-5. KUR'AN VE SÜNNET TEMSİLİ: Kur'an'ın ve Peygamberimizin o anki yaşam biçimini nasıl inşa ettiğini vurgula. Yaşanan o anı (çalışmak, yemek, yürümek) nasıl bir ibadete çevirebileceklerini göster.
+1. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen gibi değil, o an kullanıcının yanında olan bir dost gibi "Gel seninle şöyle yapalım", "Hadi gel niyetimizi şöyle düzeltelim" şeklinde konuş.
+2. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun Allah'a karşı derin hissiyatını ve insana bakış açısını aktar.
+3. AŞAMALI SÜNNET UYGULAMASI: Eylemi Öncesi, Sırası ve Sonrası olarak böl.
+4. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde takınılması gereken edep, terbiye, tevazu, sabır ve merhamet gibi değerleri vurgula.
+5. KUR'AN VE SÜNNET TEMSİLİ: Yaşanan o anı nasıl bir ibadete çevirebileceklerini göster.
 
-İlk mesajında kullanıcının meşguliyetini, ortamını ve saatini baz alarak ona samimi bir "hoş geldin" de ve şu an içinde bulunduğu duruma dair "Gel beraber Peygamberimizin sünnetiyle bu anı bereketlendirelim" diyerek konuya gir.`;
+İlk mesajında kullanıcının meşguliyetini, ortamını ve saatini baz alarak samimi bir hoş geldin de ve konuya gir.`;
 
         document.getElementById("chatArea").innerHTML = "";
         document.getElementById("userInput").disabled = false;
         document.getElementById("sendBtn").disabled = false;
         document.getElementById("setupPanel").style.display = "none";
+        document.getElementById("userInput").focus();
 
         chatHistory = [{ role: "user", parts: [{ text: systemPrompt }] }];
 
-        appendMessage("Manevi yoldaşınızla bağlantı kuruluyor...", "bot-message");
+        showLoadingIndicator();
         await fetchGeminiResponse();
     }
 
@@ -292,25 +359,17 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
             });
 
             const data = await response.json();
+            removeLoadingIndicator();
 
             if (data.error) throw new Error(data.error.message || "Hata oluştu.");
 
-            // Gemini yanıtlarında Markdown (*) kullanır, bunu basitçe temizleyip veya satır atlamalarını koruyarak ekliyoruz.
             let botReply = data.candidates[0].content.parts[0].text;
-            
             chatHistory.push({ role: "model", parts: [{ text: botReply }] });
-
-            const chatArea = document.getElementById("chatArea");
-            if (chatArea.lastChild && chatArea.lastChild.textContent.includes("bağlantı kuruluyor")) {
-                chatArea.removeChild(chatArea.lastChild);
-            }
-            if (chatArea.lastChild && chatArea.lastChild.textContent.includes("Düşünüyor...")) {
-                chatArea.removeChild(chatArea.lastChild);
-            }
 
             appendMessage(botReply, "bot-message");
 
         } catch (error) {
+            removeLoadingIndicator();
             appendMessage("Hata oluştu: " + error.message, "bot-message");
         }
     }
@@ -326,7 +385,7 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
 
         chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
-        appendMessage("Düşünüyor...", "bot-message");
+        showLoadingIndicator();
         await fetchGeminiResponse();
     }
 
@@ -335,12 +394,29 @@ Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${className}`;
         
-        // Gelen metindeki kalın yazıları HTML'e çevirme (basit Markdown desteği)
-        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        msgDiv.innerHTML = formattedText;
+        // Markdown dönüşümü
+        msgDiv.innerHTML = marked.parse(text);
         
         chatArea.appendChild(msgDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function showLoadingIndicator() {
+        const chatArea = document.getElementById("chatArea");
+        const loadingDiv = document.createElement("div");
+        loadingDiv.id = "loadingIndicator";
+        loadingDiv.className = "message bot-message";
+        loadingDiv.innerHTML = `
+            <div class="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>`;
+        chatArea.appendChild(loadingDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function removeLoadingIndicator() {
+        const indicator = document.getElementById("loadingIndicator");
+        if (indicator) indicator.remove();
     }
 
     function handleKeyPress(event) {
