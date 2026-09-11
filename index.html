@@ -13,8 +13,40 @@
             --primary: #1b4332;
             --primary-light: #2d6a4f;
             --user-msg: #e8f5e9;
+            --user-msg-border: #c8e6c9;
             --bot-msg: #f8f9fa;
+            --bot-msg-border: #e9ecef;
             --text-color: #2b2d42;
+            --info-bg: #eef5f1;
+            --info-border: #c8e6c9;
+            --info-text: #1b4332;
+            --setup-bg: #f8f9fa;
+            --setup-border: #e9ecef;
+            --input-border: #ced4da;
+            --input-bg: #ffffff;
+            --shadow-color: rgba(0,0,0,0.08);
+            --scrollbar-thumb: #cbd5e1;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --chat-bg: #1e1e1e;
+            --primary: #0d2818;
+            --primary-light: #2d6a4f;
+            --user-msg: #1b3a2b;
+            --user-msg-border: #2d6a4f;
+            --bot-msg: #2d2d2d;
+            --bot-msg-border: #3d3d3d;
+            --text-color: #e0e0e0;
+            --info-bg: #1a2e22;
+            --info-border: #2d6a4f;
+            --info-text: #a3e635;
+            --setup-bg: #252525;
+            --setup-border: #333333;
+            --input-border: #444444;
+            --input-bg: #2a2a2a;
+            --shadow-color: rgba(0,0,0,0.5);
+            --scrollbar-thumb: #4a5568;
         }
 
         * { box-sizing: border-box; }
@@ -28,6 +60,7 @@
             display: flex;
             justify-content: center;
             height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
@@ -36,7 +69,8 @@
             background: var(--chat-bg);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            transition: background-color 0.3s;
         }
 
         header {
@@ -46,6 +80,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.3s;
         }
 
         header h1 {
@@ -77,11 +112,11 @@
         }
 
         .info-panel {
-            background-color: #eef5f1;
-            border-bottom: 1px solid #c8e6c9;
+            background-color: var(--info-bg);
+            border-bottom: 1px solid var(--info-border);
             padding: 16px 20px;
             font-size: 0.9rem;
-            color: #1b4332;
+            color: var(--info-text);
             line-height: 1.5;
         }
 
@@ -100,8 +135,8 @@
 
         .setup-panel {
             padding: 18px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            background-color: var(--setup-bg);
+            border-bottom: 1px solid var(--setup-border);
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -124,14 +159,16 @@
             font-size: 0.78rem;
             margin-bottom: 5px;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         input, select, button {
             padding: 10px 14px;
-            border: 1px solid #ced4da;
+            border: 1px solid var(--input-border);
+            background-color: var(--input-bg);
+            color: var(--text-color);
             border-radius: 8px;
             font-size: 0.95rem;
             outline: none;
@@ -153,7 +190,7 @@
         }
 
         button.btn-primary:hover {
-            background-color: var(--primary);
+            opacity: 0.9;
         }
 
         .chat-area {
@@ -172,7 +209,7 @@
             border-radius: 12px;
             line-height: 1.6;
             font-size: 0.96rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 5px var(--shadow-color);
         }
 
         .message p { margin: 0 0 8px 0; }
@@ -182,23 +219,23 @@
         .user-message {
             align-self: flex-end;
             background-color: var(--user-msg);
-            border: 1px solid #c8e6c9;
+            border: 1px solid var(--user-msg-border);
             border-bottom-right-radius: 2px;
         }
 
         .bot-message {
             align-self: flex-start;
             background-color: var(--bot-msg);
-            border: 1px solid #e9ecef;
+            border: 1px solid var(--bot-msg-border);
             border-bottom-left-radius: 2px;
         }
 
         .input-area {
             padding: 15px 20px;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid var(--setup-border);
             display: flex;
             gap: 10px;
-            background-color: #fff;
+            background-color: var(--chat-bg);
         }
 
         .input-area input {
@@ -229,7 +266,7 @@
         }
 
         .chat-area::-webkit-scrollbar { width: 6px; }
-        .chat-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .chat-area::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -238,6 +275,9 @@
     <header>
         <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka - Google Gemini</h1>
         <div class="header-actions">
+            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Temayı Değiştir">
+                <i class="fa-solid fa-sun"></i>
+            </button>
             <button class="icon-btn" onclick="toggleInfo()" title="Nedir / Nasıl Kullanılır?">
                 <i class="fa-solid fa-circle-info"></i>
             </button>
@@ -304,6 +344,38 @@
 
 <script>
     let chatHistory = [];
+
+    // Tema Yönetimi
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            updateThemeIcon('dark');
+        }
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const themeBtn = document.getElementById('themeBtn');
+        if (theme === 'dark') {
+            themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        } else {
+            themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        }
+    }
+
+    initTheme();
 
     function toggleSetup() {
         const panel = document.getElementById("setupPanel");
