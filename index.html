@@ -140,6 +140,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            max-height: 50vh;
+            overflow-y: auto;
         }
 
         .form-row {
@@ -292,12 +294,12 @@
 
     <div class="info-panel" id="infoPanel" style="display: none;">
         <h3><i class="fa-solid fa-seedling"></i> Bu Uygulama Nedir?</h3>
-        <p>Bu araç; yemek yerken, çalışırken veya yoldayken o anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini, güzel ahlakını ve manevi farkındalığı samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
+        <p>Bu araç; yemek yerken, çalışırken veya yoldayken o anki durumunuza, yaşınıza ve özel hallerinize özel Peygamberimizin (S.A.V.) sünnetini, güzel ahlakını ve manevi farkındalığı samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
         
         <h3 style="margin-top: 12px;"><i class="fa-solid fa-list-check"></i> Nasıl Kullanılır?</h3>
         <ul>
-            <li><strong>Konum ve Durum:</strong> Bulunduğunuz şehri, ortamı ve o an ne yaptığınızı (örn: <i>Yemek yiyorum</i>) girin.</li>
-            <li><strong>Başlatın:</strong> "Sohbet et" butonuna tıklayarak o anınıza özel manevi tavsiyeler alın.</li>
+            <li><strong>Profil ve Durum:</strong> Şehir, ortam, yaş, sağlık ve meşguliyet bilgilerinizi eksiksiz seçin.</li>
+            <li><strong>Başlatın:</strong> "Sohbet et" butonuna tıklayarak tamamen size özel manevi tavsiyeler alın.</li>
         </ul>
     </div>
 
@@ -326,6 +328,45 @@
         <div class="form-group" id="customEnvGroup" style="display: none;">
             <label for="customEnvironment">Ortamı Belirtin:</label>
             <input type="text" id="customEnvironment" placeholder="Bulunduğunuz ortamı yazın...">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="gender">Cinsiyet:</label>
+                <select id="gender">
+                    <option value="Erkek">Erkek</option>
+                    <option value="Kadın">Kadın</option>
+                    <option value="Belirtmek İstemiyorum">Belirtmek İstemiyorum</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ageGroup">Yaş Grubu:</label>
+                <select id="ageGroup">
+                    <option value="Çocuk (7-12 yaş)">Çocuk (7-12 yaş)</option>
+                    <option value="Ergen / Genç (13-18 yaş)">Ergen / Genç (13-18 yaş)</option>
+                    <option value="Yetişkin (19-64 yaş)" selected>Yetişkin (19-64 yaş)</option>
+                    <option value="Yaşlı (65+ yaş)">Yaşlı (65+ yaş)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="healthStatus">Sağlık Durumu:</label>
+                <select id="healthStatus">
+                    <option value="Sağlıklı" selected>Sağlıklı / Sıhhatli</option>
+                    <option value="Hasta / Rahatsız">Hasta / Rahatsız / Tedavi Gören</option>
+                    <option value="Yorgun / Halsiz">Yorgun / Halsiz</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="financialStatus">Maddi Durum:</label>
+                <select id="financialStatus">
+                    <option value="Orta Hal / Normal" selected>Orta Hal / Normal</option>
+                    <option value="İhtiyaç Sahibi / Dar Gelirli">İhtiyaç Sahibi / Dar Gelirli</option>
+                    <option value="Varlıklı / Zengin">Varlıklı / Zengin</option>
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -423,6 +464,11 @@
         const envSelect = document.getElementById("environment").value;
         const customEnv = document.getElementById("customEnvironment").value.trim();
         const environment = (envSelect === "Diğer" && customEnv !== "") ? customEnv : envSelect;
+        
+        const gender = document.getElementById("gender").value;
+        const ageGroup = document.getElementById("ageGroup").value;
+        const healthStatus = document.getElementById("healthStatus").value;
+        const financialStatus = document.getElementById("financialStatus").value;
         const occupation = document.getElementById("occupation").value.trim() || "Günlük meşguliyet";
 
         const now = new Date();
@@ -431,21 +477,38 @@
 
         const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, kullanıcıya yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
 
-Kullanıcının Mevcut Durumu:
+Kullanıcının Mevcut Durumu ve Profili:
 - Şehir: ${city}
 - Tarih / Gün: ${dateString}
 - Yerel Saat: ${timeString}
 - Bulunduğu Ortam: ${environment}
 - Şu Anki Meşguliyeti: ${occupation}
+- Cinsiyet: ${gender}
+- Yaş Grubu: ${ageGroup}
+- Sağlık Durumu: ${healthStatus}
+- Maddi / Sosyoekonomik Durum: ${financialStatus}
 
-Yanıtlarını kurgularken şu felsefeyi KURALLAR olarak kabul et:
-1. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen gibi değil, o an kullanıcının yanında olan bir dost gibi "Gel seninle şöyle yapalım", "Hadi gel niyetimizi şöyle düzeltelim" şeklinde konuş.
-2. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun Allah'a karşı derin hissiyatını ve insana bakış açısını aktar.
-3. AŞAMALI SÜNNET UYGULAMASI: Eylemi Öncesi, Sırası ve Sonrası olarak böl.
-4. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde takınılması gereken edep, terbiye, tevazu, sabır ve merhamet gibi değerleri vurgula.
-5. KUR'AN VE SÜNNET TEMSİLİ: Yaşanan o anı nasıl bir ibadete çevirebileceklerini göster.
+Yanıtlarını kurgularken şu felsefeyi VE PROFİL UYUMU KURALLARINI kesinlikle uygula:
+1. YAŞA VE CİNSİYETE GÖRE HİTAP VE DİL:
+   - Çocuk ise (7-12 yaş): Çok sade, merak uyandırıcı, sevdirici, tatlı ve şefkatli bir dil kullan. Karmaşık terimlerden kaçın.
+   - Ergen / Genç ise (13-18 yaş): Dinamik, anlaşıldığını hissettiren, kimlik ve karakter inşasını destekleyen samimi bir abi/abla veya dost dili kullan.
+   - Yaşlı ise (65+ yaş): Derin bir hürmet, saygı, şefkat, ferahlatıcı dualar ve dingin bir anlatım tercih et.
+   - Cinsiyet ve edep ilkelerine uygun samimi bir hitap seç.
 
-İlk mesajında kullanıcının meşguliyetini, ortamını ve saatini baz alarak samimi bir hoş geldin de ve konuya gir.`;
+2. SAĞLIK DURUMUNA GÖRE DUYARLILIK:
+   - Eğer "Hasta / Rahatsız" ise: Zorlayıcı önerilerden kaçın; hastalar için geçerli olan dini kolaylıkları (ruhsatları), Peygamberimizin şifa dualarını, hastalığın günahlara kefaret olması anlayışını ve sabrın manevi derecelerini vurgula.
+   - Eğer "Sağlıklı" ise: Şükür, enerji ve ibadette gayret bilincini hatırla.
+
+3. MADDİ DURUMA GÖRE MANEVİ TAVSİYE:
+   - Eğer "İhtiyaç Sahibi / Dar Gelirli" ise: Tevekkül, rızık duaları, kanaat zenginliği, sabır ve manevi değerlerin üstünlüğünü nazara ver. Mahcup edici ifadelerden kaçın.
+   - Eğer "Varlıklı / Zengin" ise: Şükür, infak (sadaka/zekat), cömertlik, israftan kaçınma ve tevazu ahlakını vurgula.
+
+4. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen gibi değil, o an kullanıcının yanında olan bir dost gibi konuş.
+5. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun Allah'a karşı derin hissiyatını ve insana bakış açısını aktar.
+6. AŞAMALI SÜNNET UYGULAMASI: Eylemi Öncesi, Sırası ve Sonrası olarak böl.
+7. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde takınılması gereken edep, terbiye, tevazu, sabır ve merhamet gibi değerleri vurgula.
+
+İlk mesajında kullanıcının yaşını, durumunu, meşguliyetini ve ortamını baz alarak tam ona hitap eden samimi bir hoş geldin de ve konuya gir.`;
 
         document.getElementById("chatArea").innerHTML = "";
         document.getElementById("userInput").disabled = false;
