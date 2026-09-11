@@ -309,15 +309,23 @@
             </div>
             <div class="form-group">
                 <label for="environment">Bulunduğunuz Ortam:</label>
-                <select id="environment">
+                <select id="environment" onchange="handleEnvironmentChange()">
                     <option value="Ev">Ev</option>
                     <option value="İş Yeri / Ofis">İş Yeri / Ofis</option>
                     <option value="Okul / Üniversite">Okul / Üniversite</option>
                     <option value="Yolculuk / Yolda">Yolculuk / Yolda</option>
                     <option value="Cami / İbadethane">Cami / İbadethane</option>
                     <option value="Sosyal Ortam / Dışarıda">Sosyal Ortam / Dışarıda</option>
+                    <option value="Doğa / Açık Alan">Doğa / Açık Alan</option>
+                    <option value="Uzay / Hayalî">Uzay / Hayalî</option>
+                    <option value="Diğer">Diğer (Elle Giriş)</option>
                 </select>
             </div>
+        </div>
+
+        <div class="form-group" id="customEnvGroup" style="display: none;">
+            <label for="customEnvironment">Ortamı Belirtin:</label>
+            <input type="text" id="customEnvironment" placeholder="Bulunduğunuz ortamı yazın...">
         </div>
 
         <div class="form-group">
@@ -375,6 +383,16 @@
         }
     }
 
+    function handleEnvironmentChange() {
+        const envSelect = document.getElementById("environment");
+        const customEnvGroup = document.getElementById("customEnvGroup");
+        if (envSelect.value === "Diğer") {
+            customEnvGroup.style.display = "flex";
+        } else {
+            customEnvGroup.style.display = "none";
+        }
+    }
+
     initTheme();
 
     function toggleSetup() {
@@ -402,7 +420,9 @@
 
     async function initChat() {
         const city = document.getElementById("city").value.trim();
-        const environment = document.getElementById("environment").value;
+        const envSelect = document.getElementById("environment").value;
+        const customEnv = document.getElementById("customEnvironment").value.trim();
+        const environment = (envSelect === "Diğer" && customEnv !== "") ? customEnv : envSelect;
         const occupation = document.getElementById("occupation").value.trim() || "Günlük meşguliyet";
 
         const now = new Date();
