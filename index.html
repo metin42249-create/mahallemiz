@@ -20,12 +20,13 @@
             --info-bg: #eef5f1;
             --info-border: #c8e6c9;
             --info-text: #1b4332;
-            --setup-bg: #f8f9fa;
-            --setup-border: #e9ecef;
-            --input-border: #ced4da;
+            --setup-bg: #fdfdfd;
+            --setup-border: #e2e8f0;
+            --input-border: #cbd5e1;
             --input-bg: #ffffff;
-            --shadow-color: rgba(0,0,0,0.08);
+            --shadow-color: rgba(0,0,0,0.06);
             --scrollbar-thumb: #cbd5e1;
+            --transition: all 0.3s ease;
         }
 
         [data-theme="dark"] {
@@ -37,15 +38,15 @@
             --user-msg-border: #2d6a4f;
             --bot-msg: #2d2d2d;
             --bot-msg-border: #3d3d3d;
-            --text-color: #e0e0e0;
+            --text-color: #e2e8f0;
             --info-bg: #1a2e22;
             --info-border: #2d6a4f;
             --info-text: #a3e635;
             --setup-bg: #252525;
             --setup-border: #333333;
-            --input-border: #444444;
+            --input-border: #475569;
             --input-bg: #2a2a2a;
-            --shadow-color: rgba(0,0,0,0.5);
+            --shadow-color: rgba(0,0,0,0.4);
             --scrollbar-thumb: #4a5568;
         }
 
@@ -60,7 +61,7 @@
             display: flex;
             justify-content: center;
             height: 100vh;
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
         }
 
         .container {
@@ -69,135 +70,144 @@
             background: var(--chat-bg);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px var(--shadow-color);
-            transition: background-color 0.3s;
+            box-shadow: 0 10px 40px var(--shadow-color);
+            transition: var(--transition);
         }
 
         header {
             background-color: var(--primary);
             color: white;
-            padding: 16px 20px;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background-color 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
         header h1 {
             margin: 0;
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
+            letter-spacing: 0.5px;
         }
 
         .header-actions {
             display: flex;
-            gap: 12px;
+            gap: 16px;
         }
 
         .icon-btn {
             background: none;
             border: none;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            opacity: 0.85;
-            transition: opacity 0.2s;
+            opacity: 0.8;
+            transition: var(--transition);
         }
 
         .icon-btn:hover {
             opacity: 1;
+            transform: scale(1.1);
         }
 
         .info-panel {
             background-color: var(--info-bg);
             border-bottom: 1px solid var(--info-border);
-            padding: 16px 20px;
+            padding: 16px 24px;
             font-size: 0.9rem;
             color: var(--info-text);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        .info-panel h3 {
-            margin: 0 0 8px 0;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .info-panel h3 { margin: 0 0 8px 0; font-size: 0.95rem; }
+        .info-panel ul { margin: 6px 0 0 0; padding-left: 20px; }
 
-        .info-panel ul {
-            margin: 6px 0 0 0;
-            padding-left: 20px;
-        }
-
+        /* YENİ NESİL AYARLAR PANELİ */
         .setup-panel {
-            padding: 18px;
+            padding: 20px 24px;
             background-color: var(--setup-bg);
             border-bottom: 1px solid var(--setup-border);
-            display: flex;
+            display: none; /* Varsayılan olarak kapalı */
             flex-direction: column;
-            gap: 12px;
-            max-height: 65vh;
-            overflow-y: auto;
+            gap: 16px;
+            box-shadow: inset 0 -5px 15px var(--shadow-color);
         }
 
-        .form-row {
+        .setup-header {
             display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--primary-light);
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--setup-border);
+            padding-bottom: 8px;
+        }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px 16px;
         }
 
         .form-group {
-            flex: 1;
-            min-width: 160px;
             display: flex;
             flex-direction: column;
         }
 
         label {
-            font-size: 0.78rem;
-            margin-bottom: 5px;
+            font-size: 0.75rem;
+            margin-bottom: 6px;
             font-weight: 700;
             color: var(--primary-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        input, select, button {
+        input, select {
             padding: 10px 14px;
             border: 1px solid var(--input-border);
             background-color: var(--input-bg);
             color: var(--text-color);
             border-radius: 8px;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             outline: none;
+            transition: var(--transition);
         }
 
         input:focus, select:focus {
             border-color: var(--primary-light);
-            box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.2);
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.15);
         }
 
-        button.btn-primary {
+        .btn-save {
             background-color: var(--primary-light);
             color: white;
             border: none;
             cursor: pointer;
             font-weight: 600;
-            margin-top: 5px;
-            transition: background-color 0.2s;
+            padding: 10px 16px;
+            border-radius: 8px;
+            align-self: flex-start;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        button.btn-primary:hover {
-            opacity: 0.9;
+        .btn-save:hover {
+            background-color: var(--primary);
+            transform: translateY(-1px);
         }
 
         .chat-area {
             flex: 1;
-            padding: 20px;
+            padding: 24px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -207,11 +217,11 @@
 
         .message {
             max-width: 85%;
-            padding: 14px 18px;
-            border-radius: 12px;
+            padding: 14px 20px;
+            border-radius: 16px;
             line-height: 1.6;
-            font-size: 0.96rem;
-            box-shadow: 0 2px 5px var(--shadow-color);
+            font-size: 0.98rem;
+            box-shadow: 0 2px 8px var(--shadow-color);
         }
 
         .message p { margin: 0 0 8px 0; }
@@ -222,43 +232,68 @@
             align-self: flex-end;
             background-color: var(--user-msg);
             border: 1px solid var(--user-msg-border);
-            border-bottom-right-radius: 2px;
+            border-bottom-right-radius: 4px;
         }
 
         .bot-message {
             align-self: flex-start;
             background-color: var(--bot-msg);
             border: 1px solid var(--bot-msg-border);
-            border-bottom-left-radius: 2px;
+            border-bottom-left-radius: 4px;
         }
 
+        /* YENİ NESİL İLETİ KISMI */
         .input-area {
-            padding: 15px 20px;
+            padding: 16px 24px;
             border-top: 1px solid var(--setup-border);
             display: flex;
-            gap: 10px;
+            gap: 12px;
             background-color: var(--chat-bg);
+            align-items: center;
         }
 
         .input-area input {
             flex: 1;
+            border-radius: 30px;
+            padding: 14px 20px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            font-size: 0.95rem;
+            box-shadow: inset 0 2px 4px var(--shadow-color);
+        }
+
+        .btn-send {
+            background-color: var(--primary-light);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-send:hover {
+            background-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+            transform: translateY(-1px);
         }
 
         .typing-indicator {
             display: flex;
-            gap: 4px;
+            gap: 5px;
             align-items: center;
             padding: 8px 0;
         }
-
         .typing-indicator span {
-            width: 8px;
-            height: 8px;
+            width: 8px; height: 8px;
             background-color: var(--primary-light);
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
-
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
@@ -267,15 +302,15 @@
             40% { transform: scale(1.0); }
         }
 
-        .chat-area::-webkit-scrollbar { width: 6px; }
-        .chat-area::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka - Google Gemini</h1>
+        <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka - Manevi Yoldaş</h1>
         <div class="header-actions">
             <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Temayı Değiştir">
                 <i class="fa-solid fa-sun"></i>
@@ -286,28 +321,28 @@
             <button class="icon-btn" onclick="resetChat()" title="Sohbeti Sıfırla">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
-            <button class="icon-btn" onclick="toggleSetup()" title="Ayarları Göster/Gizle">
-                <i class="fa-solid fa-sliders"></i>
+            <button class="icon-btn" onclick="toggleSetup()" title="Profil Ayarlarını Göster/Gizle">
+                <i class="fa-solid fa-user-gear"></i>
             </button>
         </div>
     </header>
 
     <div class="info-panel" id="infoPanel" style="display: none;">
         <h3><i class="fa-solid fa-seedling"></i> Bu Uygulama Nedir?</h3>
-        <p>Bu araç; yemek yerken, çalışırken veya yoldayken o anki durumunuza, yaşınıza ve özel hallerinize özel Peygamberimizin (S.A.V.) sünnetini, güzel ahlakını ve manevi farkındalığı samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
-        
-        <h3 style="margin-top: 12px;"><i class="fa-solid fa-list-check"></i> Nasıl Kullanılır?</h3>
-        <ul>
-            <li><strong>Profil ve Durum:</strong> Şehir, ortam, yaş, sağlık ve meşguliyet bilgilerinizi eksiksiz seçin.</li>
-            <li><strong>Başlatın:</strong> "Sohbet et" butonuna tıklayarak tamamen size özel manevi tavsiyeler alın.</li>
-        </ul>
+        <p>O anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini ve güzel ahlakını samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
+        <p><strong>Nasıl Başlanır?</strong> Aşağıdaki mesaj kutusuna şu an ne yaptığınızı (örneğin: <em>"İşe gidiyorum", "Canım sıkkın", "Yemek yiyorum"</em>) yazıp göndermeniz yeterlidir.</p>
     </div>
 
+    <!-- KOMPAKT AYARLAR PANELİ -->
     <div class="setup-panel" id="setupPanel">
-        <div class="form-row">
+        <div class="setup-header">
+            <span>Kişisel Profil (Bu bilgiler cihazınızda saklanır)</span>
+            <span style="cursor:pointer;" onclick="toggleSetup()"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+        <div class="setup-grid">
             <div class="form-group">
                 <label for="city">Şehir:</label>
-                <input type="text" id="city" value="İstanbul">
+                <input type="text" id="city" value="İstanbul" placeholder="Örn: Ankara">
             </div>
             <div class="form-group">
                 <label for="environment">Bulunduğunuz Ortam:</label>
@@ -316,21 +351,14 @@
                     <option value="İş Yeri / Ofis">İş Yeri / Ofis</option>
                     <option value="Okul / Üniversite">Okul / Üniversite</option>
                     <option value="Yolculuk / Yolda">Yolculuk / Yolda</option>
-                    <option value="Cami / İbadethane">Cami / İbadethane</option>
-                    <option value="Sosyal Ortam / Dışarıda">Sosyal Ortam / Dışarıda</option>
-                    <option value="Doğa / Açık Alan">Doğa / Açık Alan</option>
-                    <option value="Uzay / Hayalî">Uzay / Hayalî</option>
+                    <option value="Dışarıda / Sosyal Ortam">Dışarıda / Sosyal Ortam</option>
                     <option value="Diğer">Diğer (Elle Giriş)</option>
                 </select>
             </div>
-        </div>
-
-        <div class="form-group" id="customEnvGroup" style="display: none;">
-            <label for="customEnvironment">Ortamı Belirtin:</label>
-            <input type="text" id="customEnvironment" placeholder="Bulunduğunuz ortamı yazın...">
-        </div>
-
-        <div class="form-row">
+            <div class="form-group" id="customEnvGroup" style="display: none;">
+                <label for="customEnvironment">Ortamı Belirtin:</label>
+                <input type="text" id="customEnvironment" placeholder="Ortamı yazın...">
+            </div>
             <div class="form-group">
                 <label for="gender">Cinsiyet:</label>
                 <select id="gender">
@@ -343,60 +371,53 @@
                 <label for="ageGroup">Yaş Grubu:</label>
                 <select id="ageGroup">
                     <option value="Çocuk (7-12 yaş)">Çocuk (7-12 yaş)</option>
-                    <option value="Ergen / Genç (13-18 yaş)">Ergen / Genç (13-18 yaş)</option>
+                    <option value="Genç (13-18 yaş)">Genç (13-18 yaş)</option>
                     <option value="Yetişkin (19-64 yaş)" selected>Yetişkin (19-64 yaş)</option>
                     <option value="Yaşlı (65+ yaş)">Yaşlı (65+ yaş)</option>
                 </select>
             </div>
-        </div>
-
-        <div class="form-row">
             <div class="form-group">
                 <label for="healthStatus">Sağlık Durumu:</label>
                 <select id="healthStatus">
                     <option value="Sağlıklı" selected>Sağlıklı / Sıhhatli</option>
-                    <option value="Hasta / Rahatsız">Hasta / Rahatsız / Tedavi Gören</option>
-                    <option value="Yorgun / Halsiz">Yorgun / Halsiz</option>
+                    <option value="Hasta / Yorgun">Hasta / Rahatsız / Yorgun</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="financialStatus">Maddi Durum:</label>
                 <select id="financialStatus">
                     <option value="Orta Hal / Normal" selected>Orta Hal / Normal</option>
-                    <option value="İhtiyaç Sahibi / Dar Gelirli">İhtiyaç Sahibi / Dar Gelirli</option>
-                    <option value="Varlıklı / Zengin">Varlıklı / Zengin</option>
+                    <option value="Dar Gelirli">Dar Gelirli</option>
+                    <option value="Varlıklı">Varlıklı</option>
                 </select>
             </div>
         </div>
-
-        <div class="form-group">
-            <label for="occupation">Meslek / Okul / Şu Anki Meşguliyet:</label>
-            <input type="text" id="occupation" placeholder="Örn: Yemek yiyorum, Çalışıyorum, Ders dinliyorum vb.">
-        </div>
-
-        <button class="btn-primary" id="startBtn" onclick="initChat()">
-            <i class="fa-solid fa-handshake"></i> Sohbet et
+        <button class="btn-save" onclick="saveSettingsAndClose()">
+            <i class="fa-solid fa-floppy-disk"></i> Profili Kaydet
         </button>
     </div>
 
     <div class="chat-area" id="chatArea">
-        <div class="message bot-message">
-            Selamun aleykum. Durumunuzu ve şu anki meşguliyetinizi yukarıdaki panelden girip <strong>"Sohbet et"</strong> butonuna basarak sohbeti başlatabilirsiniz.
+        <div class="message bot-message" id="welcomeMsg">
+            Selamun aleykum. Sağ üstteki <strong><i class="fa-solid fa-user-gear"></i> ayarlar (profil)</strong> ikonundan durumunuzu güncelleyebilir veya doğrudan aşağıya şu an ne yaptığınızı (veya ne hissettiğinizi) yazarak yoldaşınızla sohbete başlayabilirsiniz.
         </div>
     </div>
 
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Şu an ne yapıyorsun veya ne sormak istersin?" disabled onkeypress="handleKeyPress(event)">
-        <button class="btn-primary" id="sendBtn" onclick="sendMessage()" disabled>Gönder</button>
+        <input type="text" id="userInput" placeholder="Şu an ne yapıyorsun veya ne düşünüyorsun?" onkeypress="handleKeyPress(event)">
+        <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+            Gönder <i class="fa-solid fa-paper-plane"></i>
+        </button>
     </div>
 </div>
 
 <script>
     let chatHistory = [];
+    const STORAGE_PREFIX = 'manevi_yoldas_';
 
-    // Tema Yönetimi
+    // --- Tema Ayarları ---
     function initTheme() {
-        const savedTheme = localStorage.getItem('theme');
+        const savedTheme = localStorage.getItem(STORAGE_PREFIX + 'theme');
         if (savedTheme) {
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
@@ -409,122 +430,132 @@
     function toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
         document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        localStorage.setItem(STORAGE_PREFIX + 'theme', newTheme);
         updateThemeIcon(newTheme);
     }
 
     function updateThemeIcon(theme) {
         const themeBtn = document.getElementById('themeBtn');
-        if (theme === 'dark') {
-            themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        } else {
-            themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        }
+        themeBtn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    }
+
+    // --- Ayar / Profil İşlemleri (Local Storage) ---
+    function loadSettings() {
+        const fields = ['city', 'environment', 'customEnvironment', 'gender', 'ageGroup', 'healthStatus', 'financialStatus'];
+        let hasSavedData = false;
+        
+        fields.forEach(field => {
+            const val = localStorage.getItem(STORAGE_PREFIX + field);
+            if (val !== null) {
+                document.getElementById(field).value = val;
+                hasSavedData = true;
+            }
+        });
+
+        handleEnvironmentChange();
+
+        // Daha önce kayıtlı veri yoksa, kullanıcı doldursun diye paneli açık göster
+        const panel = document.getElementById("setupPanel");
+        panel.style.display = hasSavedData ? "none" : "flex";
+    }
+
+    function saveSettingsLocally() {
+        const fields = ['city', 'environment', 'customEnvironment', 'gender', 'ageGroup', 'healthStatus', 'financialStatus'];
+        fields.forEach(field => {
+            localStorage.setItem(STORAGE_PREFIX + field, document.getElementById(field).value);
+        });
+    }
+
+    function saveSettingsAndClose() {
+        saveSettingsLocally();
+        toggleSetup();
+    }
+
+    function toggleSetup() {
+        const panel = document.getElementById("setupPanel");
+        panel.style.display = (panel.style.display === "none" || panel.style.display === "") ? "flex" : "none";
+    }
+
+    function toggleInfo() {
+        const panel = document.getElementById("infoPanel");
+        panel.style.display = (panel.style.display === "none" || panel.style.display === "") ? "block" : "none";
     }
 
     function handleEnvironmentChange() {
         const envSelect = document.getElementById("environment");
         const customEnvGroup = document.getElementById("customEnvGroup");
-        if (envSelect.value === "Diğer") {
-            customEnvGroup.style.display = "flex";
-        } else {
-            customEnvGroup.style.display = "none";
-        }
+        customEnvGroup.style.display = envSelect.value === "Diğer" ? "flex" : "none";
     }
 
-    initTheme();
-
-    function toggleSetup() {
-        const panel = document.getElementById("setupPanel");
-        panel.style.display = panel.style.display === "none" ? "flex" : "none";
-    }
-
-    function toggleInfo() {
-        const panel = document.getElementById("infoPanel");
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
-    }
-
+    // --- Sohbet İşlemleri ---
     function resetChat() {
         if (confirm("Sohbet geçmişi temizlensin mi?")) {
             chatHistory = [];
             document.getElementById("chatArea").innerHTML = `
-                <div class="message bot-message">
-                    Sohbet sıfırlandı. Yeniden başlamak için "Sohbet et" butonuna basabilirsiniz.
+                <div class="message bot-message" id="welcomeMsg">
+                    Sohbet sıfırlandı. Aşağıya şu anki durumunuzu yazarak yeniden başlayabilirsiniz.
                 </div>`;
-            document.getElementById("userInput").disabled = true;
-            document.getElementById("sendBtn").disabled = true;
-            document.getElementById("setupPanel").style.display = "flex";
         }
     }
 
-    async function initChat() {
-        const city = document.getElementById("city").value.trim();
-        const envSelect = document.getElementById("environment").value;
-        const customEnv = document.getElementById("customEnvironment").value.trim();
-        const environment = (envSelect === "Diğer" && customEnv !== "") ? customEnv : envSelect;
-        
-        const gender = document.getElementById("gender").value;
-        const ageGroup = document.getElementById("ageGroup").value;
-        const healthStatus = document.getElementById("healthStatus").value;
-        const financialStatus = document.getElementById("financialStatus").value;
-        const occupation = document.getElementById("occupation").value.trim() || "Günlük meşguliyet";
+    async function sendMessage() {
+        const inputField = document.getElementById("userInput");
+        const userText = inputField.value.trim();
 
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        if (!userText) return;
 
-        const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, kullanıcıya yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
+        // Mesaj gönderilirken güncel profili arkada sessizce kaydet
+        saveSettingsLocally();
 
-Kullanıcının Mevcut Durumu ve Profili:
-- Şehir: ${city}
-- Tarih / Gün: ${dateString}
-- Yerel Saat: ${timeString}
-- Bulunduğu Ortam: ${environment}
-- Şu Anki Meşguliyeti: ${occupation}
-- Cinsiyet: ${gender}
-- Yaş Grubu: ${ageGroup}
-- Sağlık Durumu: ${healthStatus}
-- Maddi / Sosyoekonomik Durum: ${financialStatus}
+        appendMessage(userText, "user-message");
+        inputField.value = "";
 
-Yanıtlarını kurgularken şu felsefeyi VE PROFİL UYUMU KURALLARINI kesinlikle uygula:
-1. YAŞA VE CİNSİYETE GÖRE HİTAP VE DİL:
-   - Çocuk ise (7-12 yaş): Çok sade, merak uyandırıcı, sevdirici, tatlı ve şefkatli bir dil kullan. Karmaşık terimlerden kaçın.
-   - Ergen / Genç ise (13-18 yaş): Dinamik, anlaşıldığını hissettiren, kimlik ve karakter inşasını destekleyen samimi bir abi/abla veya dost dili kullan.
-   - Yaşlı ise (65+ yaş): Derin bir hürmet, saygı, şefkat, ferahlatıcı dualar ve dingin bir anlatım tercih et.
-   - Cinsiyet ve edep ilkelerine uygun samimi bir hitap seç.
+        // EĞER İLK MESAJ İSE SİSTEM İSTEMİNİ (PROMPT) BURADA KURGUYORUZ
+        if (chatHistory.length === 0) {
+            const city = document.getElementById("city").value.trim() || "Belirtilmedi";
+            const envSelect = document.getElementById("environment").value;
+            const customEnv = document.getElementById("customEnvironment").value.trim();
+            const environment = (envSelect === "Diğer" && customEnv !== "") ? customEnv : envSelect;
+            const gender = document.getElementById("gender").value;
+            const ageGroup = document.getElementById("ageGroup").value;
+            const healthStatus = document.getElementById("healthStatus").value;
+            const financialStatus = document.getElementById("financialStatus").value;
 
-2. SAĞLIK DURUMUNA GÖRE DUYARLILIK:
-   - Eğer "Hasta / Rahatsız" ise: Zorlayıcı önerilerden kaçın; hastalar için geçerli olan dini kolaylıkları (ruhsatları), Peygamberimizin şifa dualarını, hastalığın günahlara kefaret olması anlayışını ve sabrın manevi derecelerini vurgula.
-   - Eğer "Sağlıklı" ise: Şükür, enerji ve ibadette gayret bilincini hatırla.
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-3. MADDİ DURUMA GÖRE MANEVİ TAVSİYE:
-   - Eğer "İhtiyaç Sahibi / Dar Gelirli" ise: Tevekkül, rızık duaları, kanaat zenginliği, sabır ve manevi değerlerin üstünlüğünü nazara ver. Mahcup edici ifadelerden kaçın.
-   - Eğer "Varlıklı / Zengin" ise: Şükür, infak (sadaka/zekat), cömertlik, israftan kaçınma ve tevazu ahlakını vurgula.
+            const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ahlakını yaşayan, yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
 
-4. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen gibi değil, o an kullanıcının yanında olan bir dost gibi konuş.
-5. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun Allah'a karşı derin hissiyatını ve insana bakış açısını aktar.
-6. AŞAMALI SÜNNET UYGULAMASI: Eylemi Öncesi, Sırası ve Sonrası olarak böl.
-7. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde takınılması gereken edep, terbiye, tevazu, sabır ve merhamet gibi değerleri vurgula.
+Kullanıcının Profili:
+- Şehir: ${city} | Tarih: ${dateString} | Saat: ${timeString}
+- Ortam: ${environment}
+- Cinsiyet: ${gender} | Yaş Grubu: ${ageGroup}
+- Sağlık: ${healthStatus} | Maddi Durum: ${financialStatus}
 
-İlk mesajında kullanıcının yaşını, durumunu, meşguliyetini ve ortamını baz alarak tam ona hitap eden samimi bir hoş geldin de ve konuya gir.`;
+DİKKAT: Kullanıcı az önce sana şu mesajı / güncel meşguliyetini iletti: "${userText}"
 
-        document.getElementById("chatArea").innerHTML = "";
-        document.getElementById("userInput").disabled = false;
-        document.getElementById("sendBtn").disabled = false;
-        document.getElementById("setupPanel").style.display = "none";
-        document.getElementById("infoPanel").style.display = "none";
-        document.getElementById("userInput").focus();
+Yanıtlarını kurgularken profiline (yaş, sağlık, cinsiyet) uygun samimi bir dost dili kullan. Cümlelerine doğrudan bu mesaja uygun, manevi ve sünnet odaklı samimi bir yoldaşlık yaparak başla. Karşındakiyle muhabbet ediyormuşsun gibi hissettir.`;
 
-        chatHistory = [{ role: "user", parts: [{ text: systemPrompt }] }];
+            chatHistory.push({ role: "user", parts: [{ text: systemPrompt }] });
+            
+            // Hoş geldin mesajını kaldır
+            const welcomeMsg = document.getElementById("welcomeMsg");
+            if(welcomeMsg) welcomeMsg.style.display = 'none';
+
+        } else {
+            // İlk mesaj değilse normal sohbete devam et
+            chatHistory.push({ role: "user", parts: [{ text: userText }] });
+        }
 
         showLoadingIndicator();
         await fetchGeminiResponse();
     }
 
     async function fetchGeminiResponse() {
-        const url = '/api/gemini';
+        // BURAYA KENDİ GEMINI API ENDPOINT/MANTIK YAPINIZI GİRİNİZ
+        const url = '/api/gemini'; 
 
         try {
             const response = await fetch(url, {
@@ -549,28 +580,11 @@ Yanıtlarını kurgularken şu felsefeyi VE PROFİL UYUMU KURALLARINI kesinlikle
         }
     }
 
-    async function sendMessage() {
-        const inputField = document.getElementById("userInput");
-        const userText = inputField.value.trim();
-
-        if (!userText) return;
-
-        appendMessage(userText, "user-message");
-        inputField.value = "";
-
-        chatHistory.push({ role: "user", parts: [{ text: userText }] });
-
-        showLoadingIndicator();
-        await fetchGeminiResponse();
-    }
-
     function appendMessage(text, className) {
         const chatArea = document.getElementById("chatArea");
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${className}`;
-        
         msgDiv.innerHTML = marked.parse(text);
-        
         chatArea.appendChild(msgDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
     }
@@ -580,10 +594,7 @@ Yanıtlarını kurgularken şu felsefeyi VE PROFİL UYUMU KURALLARINI kesinlikle
         const loadingDiv = document.createElement("div");
         loadingDiv.id = "loadingIndicator";
         loadingDiv.className = "message bot-message";
-        loadingDiv.innerHTML = `
-            <div class="typing-indicator">
-                <span></span><span></span><span></span>
-            </div>`;
+        loadingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
         chatArea.appendChild(loadingDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
     }
@@ -596,6 +607,12 @@ Yanıtlarını kurgularken şu felsefeyi VE PROFİL UYUMU KURALLARINI kesinlikle
     function handleKeyPress(event) {
         if (event.key === "Enter") sendMessage();
     }
+
+    // Sayfa yüklendiğinde ayarları ve temayı başlat
+    document.addEventListener("DOMContentLoaded", () => {
+        initTheme();
+        loadSettings();
+    });
 </script>
 
 </body>
