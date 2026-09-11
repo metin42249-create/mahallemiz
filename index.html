@@ -127,12 +127,11 @@
         .info-panel h3 { margin: 0 0 8px 0; font-size: 0.95rem; }
         .info-panel ul { margin: 6px 0 0 0; padding-left: 20px; }
 
-        /* YENİ NESİL AYARLAR PANELİ */
         .setup-panel {
             padding: 20px 24px;
             background-color: var(--setup-bg);
             border-bottom: 1px solid var(--setup-border);
-            display: none; /* Varsayılan olarak kapalı */
+            display: none;
             flex-direction: column;
             gap: 16px;
             box-shadow: inset 0 -5px 15px var(--shadow-color);
@@ -242,7 +241,6 @@
             border-bottom-left-radius: 4px;
         }
 
-        /* YENİ NESİL İLETİ KISMI */
         .input-area {
             padding: 16px 24px;
             border-top: 1px solid var(--setup-border);
@@ -330,7 +328,7 @@
     <div class="info-panel" id="infoPanel" style="display: none;">
         <h3><i class="fa-solid fa-seedling"></i> Bu Uygulama Nedir?</h3>
         <p>O anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini ve güzel ahlakını samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
-        <p><strong>Nasıl Başlanır?</strong> Aşağıdaki mesaj kutusuna şu an ne yaptığınızı (örneğin: <em>"İşe gidiyorum", "Canım sıkkın", "Yemek yiyorum"</em>) yazıp göndermeniz yeterlidir.</p>
+        <p><strong>Nasıl Başlanır?</strong> Aşağıdaki mesaj kutusuna şu an ne yaptığınızı (örneğin: <em>"İşe gidiyorum", "Canım sıkkın", "Dizi seyrediyorum"</em>) yazıp göndermeniz yeterlidir.</p>
     </div>
 
     <!-- KOMPAKT AYARLAR PANELİ -->
@@ -399,7 +397,7 @@
 
     <div class="chat-area" id="chatArea">
         <div class="message bot-message" id="welcomeMsg">
-            Selamun aleykum. Sağ üstteki <strong><i class="fa-solid fa-user-gear"></i> ayarlar (profil)</strong> ikonundan durumunuzu güncelleyebilir veya doğrudan aşağıya şu an ne yaptığınızı (veya ne hissettiğinizi) yazarak yoldaşınızla sohbete başlayabilirsiniz.
+            Selamun aleykum. Sağ üstteki <strong><i class="fa-solid fa-user-gear"></i> ayarlar (profil)</strong> ikonundan durumunuzu güncelleyebilir veya doğrudan aşağıya şu an ne yaptığınızı yazarak yoldaşınızla sohbete başlayabilirsiniz.
         </div>
     </div>
 
@@ -415,7 +413,6 @@
     let chatHistory = [];
     const STORAGE_PREFIX = 'manevi_yoldas_';
 
-    // --- Tema Ayarları ---
     function initTheme() {
         const savedTheme = localStorage.getItem(STORAGE_PREFIX + 'theme');
         if (savedTheme) {
@@ -440,7 +437,6 @@
         themeBtn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
     }
 
-    // --- Ayar / Profil İşlemleri (Local Storage) ---
     function loadSettings() {
         const fields = ['city', 'environment', 'customEnvironment', 'gender', 'ageGroup', 'healthStatus', 'financialStatus'];
         let hasSavedData = false;
@@ -455,7 +451,6 @@
 
         handleEnvironmentChange();
 
-        // Daha önce kayıtlı veri yoksa, kullanıcı doldursun diye paneli açık göster
         const panel = document.getElementById("setupPanel");
         panel.style.display = hasSavedData ? "none" : "flex";
     }
@@ -488,7 +483,6 @@
         customEnvGroup.style.display = envSelect.value === "Diğer" ? "flex" : "none";
     }
 
-    // --- Sohbet İşlemleri ---
     function resetChat() {
         if (confirm("Sohbet geçmişi temizlensin mi?")) {
             chatHistory = [];
@@ -505,9 +499,7 @@
 
         if (!userText) return;
 
-        // Mesaj gönderilirken güncel profili arkada sessizce kaydet
         saveSettingsLocally();
-
         appendMessage(userText, "user-message");
         inputField.value = "";
 
@@ -526,26 +518,35 @@
             const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
             const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ahlakını yaşayan, yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
+            // ESKİ DOSYADAKİ MANEVİ KURALLAR BURADA YENİDEN DEVREYE ALINDI
+            const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, kullanıcıya yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
 
-Kullanıcının Profili:
-- Şehir: ${city} | Tarih: ${dateString} | Saat: ${timeString}
-- Ortam: ${environment}
-- Cinsiyet: ${gender} | Yaş Grubu: ${ageGroup}
-- Sağlık: ${healthStatus} | Maddi Durum: ${financialStatus}
+Kullanıcının Mevcut Durumu ve Profili:
+- Şehir: ${city}
+- Tarih / Gün: ${dateString}
+- Yerel Saat: ${timeString}
+- Bulunduğu Ortam: ${environment}
+- Cinsiyet: ${gender}
+- Yaş Grubu: ${ageGroup}
+- Sağlık Durumu: ${healthStatus}
+- Maddi Durum: ${financialStatus}
+- Kullanıcının Şu Anki Eylemi / Mesajı: "${userText}"
 
-DİKKAT: Kullanıcı az önce sana şu mesajı / güncel meşguliyetini iletti: "${userText}"
+Yanıtlarını kurgularken profili dikkate al ve şu felsefeyi KURALLAR olarak kabul edip HİÇBİRİNİ EKSİLTME:
+1. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen veya sıradan bir sohbet arkadaşı gibi değil, o an kullanıcının yanında olan manevi bir dost gibi "Gel seninle şöyle yapalım", "Hadi gel niyetimizi şöyle düzeltelim" şeklinde konuş.
+2. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun Allah'a karşı derin hissiyatını ve insana bakış açısını aktar.
+3. AŞAMALI SÜNNET UYGULAMASI: Belirtilen eylemi Öncesi, Sırası ve Sonrası olarak böl.
+4. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde takınılması gereken edep, terbiye, tevazu, sabır ve merhamet gibi değerleri vurgula.
+5. KUR'AN VE SÜNNET TEMSİLİ: Yaşanan o anı nasıl bir ibadete çevirebileceklerini göster. Dünyevi ve yüzeysel tabirlerden ("iyi seyirler", "bölüm arası" vs.) uzak dur, konuyu hep manevi kazanımlara bağla.
 
-Yanıtlarını kurgularken profiline (yaş, sağlık, cinsiyet) uygun samimi bir dost dili kullan. Cümlelerine doğrudan bu mesaja uygun, manevi ve sünnet odaklı samimi bir yoldaşlık yaparak başla. Karşındakiyle muhabbet ediyormuşsun gibi hissettir.`;
+İlk mesajında kullanıcının eylemini ("${userText}"), ortamını ve saatini baz alarak, doğrudan konuya gir ve yukarıdaki 5 kuralı harfiyen uygulayarak manevi yoldaşlığını başlat.`;
 
             chatHistory.push({ role: "user", parts: [{ text: systemPrompt }] });
             
-            // Hoş geldin mesajını kaldır
             const welcomeMsg = document.getElementById("welcomeMsg");
             if(welcomeMsg) welcomeMsg.style.display = 'none';
 
         } else {
-            // İlk mesaj değilse normal sohbete devam et
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
         }
 
@@ -554,7 +555,6 @@ Yanıtlarını kurgularken profiline (yaş, sağlık, cinsiyet) uygun samimi bir
     }
 
     async function fetchGeminiResponse() {
-        // BURAYA KENDİ GEMINI API ENDPOINT/MANTIK YAPINIZI GİRİNİZ
         const url = '/api/gemini'; 
 
         try {
@@ -608,7 +608,6 @@ Yanıtlarını kurgularken profiline (yaş, sağlık, cinsiyet) uygun samimi bir
         if (event.key === "Enter") sendMessage();
     }
 
-    // Sayfa yüklendiğinde ayarları ve temayı başlat
     document.addEventListener("DOMContentLoaded", () => {
         initTheme();
         loadSettings();
