@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Manevi Yoldaş & Sünnet Rehberi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -61,6 +61,8 @@
             display: flex;
             justify-content: center;
             height: 100vh;
+            height: 100dvh; /* MOBİL BOŞLUK SORUNUNU ÇÖZER */
+            overflow: hidden; /* Gövdenin kaymasını engeller */
             transition: var(--transition);
         }
 
@@ -70,6 +72,7 @@
             background: var(--chat-bg);
             display: flex;
             flex-direction: column;
+            height: 100%;
             box-shadow: 0 10px 40px var(--shadow-color);
             transition: var(--transition);
         }
@@ -83,6 +86,7 @@
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             z-index: 10;
+            flex-shrink: 0;
         }
 
         header h1 {
@@ -122,6 +126,7 @@
             font-size: 0.9rem;
             color: var(--info-text);
             line-height: 1.6;
+            flex-shrink: 0;
         }
 
         .info-panel h3 { margin: 0 0 8px 0; font-size: 0.95rem; }
@@ -135,6 +140,9 @@
             flex-direction: column;
             gap: 16px;
             box-shadow: inset 0 -5px 15px var(--shadow-color);
+            flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 40vh;
         }
 
         .setup-header {
@@ -204,6 +212,35 @@
             transform: translateY(-1px);
         }
 
+        /* YENİ: SÜREKLİ GÖRÜNÜR CEVAP ÇEŞİDİ PANELİ */
+        .response-style-panel {
+            background-color: var(--setup-bg);
+            border-bottom: 1px solid var(--setup-border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            z-index: 5;
+            flex-shrink: 0;
+        }
+
+        .response-style-panel label {
+            margin: 0;
+            color: var(--primary-light);
+            font-weight: 700;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .response-style-panel select, .response-style-panel input {
+            flex: 1;
+            min-width: 250px;
+            padding: 8px 14px;
+            border-radius: 6px;
+        }
+
         .chat-area {
             flex: 1;
             padding: 24px;
@@ -248,10 +285,12 @@
             gap: 12px;
             background-color: var(--chat-bg);
             align-items: center;
+            flex-shrink: 0; /* BUTONUN VE ALANIN EZİLMESİNİ ENGELLER */
         }
 
         .input-area input {
             flex: 1;
+            min-width: 0; /* Input alanının genişleyip butonu dışarı atmasını engeller */
             border-radius: 30px;
             padding: 14px 20px;
             background-color: var(--input-bg);
@@ -272,6 +311,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0; /* BUTONUN KÜÇÜLMESİNİ ENGELLER */
+            white-space: nowrap; /* YAZININ ALT ALTA GEÇMESİNİ ENGELLER */
         }
 
         .btn-send:hover {
@@ -328,7 +369,7 @@
     <div class="info-panel" id="infoPanel" style="display: none;">
         <h3><i class="fa-solid fa-seedling"></i> Bu Uygulama Nedir?</h3>
         <p>O anki durumunuza özel Peygamberimizin (S.A.V.) sünnetini ve güzel ahlakını samimi bir yoldaş diliyle hatırlatan dijital bir rehberdir.</p>
-        <p><strong>Nasıl Başlanır?</strong> Aşağıdaki mesaj kutusuna şu an ne yaptığınızı (örneğin: <em>"İşe gidiyorum", "Canım sıkkın", "Dizi seyrediyorum"</em>) yazıp göndermeniz yeterlidir.</p>
+        <p><strong>Nasıl Başlanır?</strong> Aşağıdaki mesaj kutusuna şu an ne yaptığınızı (örneğin: <em>"İşe gidiyorum", "Canım sıkkın", "Dizi seyrediyorum"</em>) veya sorunuzu yazıp göndermeniz yeterlidir.</p>
     </div>
 
     <!-- KOMPAKT AYARLAR PANELİ -->
@@ -395,14 +436,28 @@
         </button>
     </div>
 
+    <!-- YENİ EKLENEN: CEVAP ÇEŞİDİ / SORU TARZI PANELİ (SÜREKLİ GÖRÜNÜR) -->
+    <div class="response-style-panel">
+        <label for="responseStyle"><i class="fa-solid fa-list-check"></i> Cevap / Sohbet Tarzı:</label>
+        <select id="responseStyle" onchange="handleStyleChange()">
+            <option value="standart">Sohbet & Yoldaşlık (Varsayılan)</option>
+            <option value="soru_cevap">Bu soruyu Peygamberimiz (S.A.V.) nasıl cevaplardı?</option>
+            <option value="yerimde_olsa">Peygamberimiz benim yerimde olsaydı ne yapardı?</option>
+            <option value="bunun_yerine">Şu an yaptığımın yerine O (S.A.V.) ne yapardı?</option>
+            <option value="bu_saatte">Peygamberimiz şu saatlerde ne ile meşgul olurdu?</option>
+            <option value="diger">Diğer (Elle Giriniz)</option>
+        </select>
+        <input type="text" id="customResponseStyle" placeholder="Nasıl bir tarzda cevap istiyorsunuz?" style="display: none;">
+    </div>
+
     <div class="chat-area" id="chatArea">
         <div class="message bot-message" id="welcomeMsg">
-            Selamun aleykum. Sağ üstteki <strong><i class="fa-solid fa-user-gear"></i> ayarlar (profil)</strong> ikonundan durumunuzu güncelleyebilir veya doğrudan aşağıya şu an ne yaptığınızı yazarak yoldaşınızla sohbete başlayabilirsiniz.
+            Selamun aleykum. Sağ üstteki <strong><i class="fa-solid fa-user-gear"></i> ayarlar (profil)</strong> ikonundan durumunuzu güncelleyebilir, hemen üst kısımdan ise <strong>cevap tarzını</strong> belirleyebilirsiniz. Sohbet etmek veya soru sormak için aşağıya yazın.
         </div>
     </div>
 
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Şu an ne yapıyorsun veya ne düşünüyorsun?" onkeypress="handleKeyPress(event)">
+        <input type="text" id="userInput" placeholder="Mesajınızı veya sorunuzu yazın..." onkeypress="handleKeyPress(event)">
         <button class="btn-send" id="sendBtn" onclick="sendMessage()">
             Gönder <i class="fa-solid fa-paper-plane"></i>
         </button>
@@ -482,13 +537,24 @@
         const customEnvGroup = document.getElementById("customEnvGroup");
         customEnvGroup.style.display = envSelect.value === "Diğer" ? "flex" : "none";
     }
+    
+    // YENİ EKLENEN: CEVAP ÇEŞİDİ DEĞİŞTİRME MANTIĞI
+    function handleStyleChange() {
+        const styleSelect = document.getElementById("responseStyle");
+        const customInput = document.getElementById("customResponseStyle");
+        if (styleSelect.value === "diger") {
+            customInput.style.display = "block";
+        } else {
+            customInput.style.display = "none";
+        }
+    }
 
     function resetChat() {
         if (confirm("Sohbet geçmişi temizlensin mi?")) {
             chatHistory = [];
             document.getElementById("chatArea").innerHTML = `
                 <div class="message bot-message" id="welcomeMsg">
-                    Sohbet sıfırlandı. Aşağıya şu anki durumunuzu yazarak yeniden başlayabilirsiniz.
+                    Sohbet sıfırlandı. Aşağıya mesajınızı yazarak yeniden başlayabilirsiniz.
                 </div>`;
         }
     }
@@ -502,6 +568,27 @@
         saveSettingsLocally();
         appendMessage(userText, "user-message");
         inputField.value = "";
+
+        // CEVAP TARZINI AL VE YÖNERGEYİ HAZIRLA
+        const styleSelect = document.getElementById("responseStyle").value;
+        const customStyle = document.getElementById("customResponseStyle").value.trim();
+        
+        let styleInstruction = "";
+        if (styleSelect === "soru_cevap") {
+             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir sahabe dilinden ver ve 'Peygamberimiz (s.a.v.) bu sorunu şöyle cevaplardı...' mantığıyla anlat.";
+        } else if (styleSelect === "yerimde_olsa") {
+             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir sahabe dilinden ver ve 'Peygamberimiz (s.a.v.) senin yerinde olsaydı şu an şöyle yapardı...' mantığıyla anlat.";
+        } else if (styleSelect === "bunun_yerine") {
+             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir sahabe dilinden ver ve 'Peygamberimiz (s.a.v.) senin şu an yaptığın şeyin yerine şunu yapardı...' mantığıyla alternatif sun.";
+        } else if (styleSelect === "bu_saatte") {
+             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir sahabe dilinden ver ve 'Peygamberimiz (s.a.v.) günün tam bu saatlerinde genelde şununla meşgul olurdu...' diyerek günlük rutini üzerinden yanıtla.";
+        } else if (styleSelect === "diger" && customStyle !== "") {
+             styleInstruction = `Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir sahabe dilinden ver ve tam olarak şu tarza uygun cevapla: '${customStyle}'.`;
+        } else {
+             styleInstruction = "Görev: Peygamberimizi çok iyi tanıyan bir dost gibi manevi yoldaşlık yap, yanında olduğunu hissettir.";
+        }
+
+        const systemNote = `\n\n[SİSTEM NOTU: ${styleInstruction}]`;
 
         // EĞER İLK MESAJ İSE SİSTEM İSTEMİNİ (PROMPT) BURADA KURGUYORUZ
         if (chatHistory.length === 0) {
@@ -518,8 +605,7 @@
             const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
             const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // ESKİ DOSYADAKİ MANEVİ KURALLAR BURADA YENİDEN DEVREYE ALINDI
-            const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, kullanıcıya yukarıdan öğüt veren biri değil, "Kardeşim, gel seninle şu an şunu yapalım" diyerek yoldaşlık eden samimi bir manevi rehbersin.
+            const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, samimi bir manevi rehbersin.
 
 Kullanıcının Mevcut Durumu ve Profili:
 - Şehir: ${city}
@@ -530,16 +616,10 @@ Kullanıcının Mevcut Durumu ve Profili:
 - Yaş Grubu: ${ageGroup}
 - Sağlık Durumu: ${healthStatus}
 - Maddi Durum: ${financialStatus}
-- Kullanıcının Şu Anki Eylemi / Mesajı: "${userText}"
 
-Yanıtlarını kurgularken profili dikkate al ve şu felsefeyi KURALLAR olarak kabul edip HİÇBİRİNİ EKSİLTME:
-1. YOLDAŞLIK DİLİ: Hitabın samimi olsun. Öğretmen veya sıradan bir sohbet arkadaşı gibi değil, o an kullanıcının yanında olan manevi bir dost gibi "Gel seninle şöyle yapalım", "Hadi gel niyetimizi şöyle düzeltelim" şeklinde konuş.
-2. PEYGAMBERİMİZİN HÂLİ VE BAKIŞ AÇISI: Kullanıcı ne yapıyorsa "Peygamberimiz (S.A.V.) şu an senin yerinde olsaydı..." diyerek anlat. Onun Allah'a karşı derin hissiyatını ve insana bakış açısını aktar.
-3. AŞAMALI SÜNNET UYGULAMASI: Belirtilen eylemi Öncesi, Sırası ve Sonrası olarak böl.
-4. KARAKTER VE ERDEM HATIRLATMASI: O anki eylemde takınılması gereken edep, terbiye, tevazu, sabır ve merhamet gibi değerleri vurgula.
-5. KUR'AN VE SÜNNET TEMSİLİ: Yaşanan o anı nasıl bir ibadete çevirebileceklerini göster. Dünyevi ve yüzeysel tabirlerden ("iyi seyirler", "bölüm arası" vs.) uzak dur, konuyu hep manevi kazanımlara bağla.
-
-İlk mesajında kullanıcının eylemini ("${userText}"), ortamını ve saatini baz alarak, doğrudan konuya gir ve yukarıdaki 5 kuralı harfiyen uygulayarak manevi yoldaşlığını başlat.`;
+Yanıtlarını kurgularken profili dikkate al.
+Kullanıcı Ne Yapıyor / Ne Soruyor: "${userText}"
+${systemNote}`;
 
             chatHistory.push({ role: "user", parts: [{ text: systemPrompt }] });
             
@@ -547,7 +627,8 @@ Yanıtlarını kurgularken profili dikkate al ve şu felsefeyi KURALLAR olarak k
             if(welcomeMsg) welcomeMsg.style.display = 'none';
 
         } else {
-            chatHistory.push({ role: "user", parts: [{ text: userText }] });
+            // Sonraki mesajlarda o an seçili olan cevap tarzını modele hatırlatıyoruz
+            chatHistory.push({ role: "user", parts: [{ text: userText + systemNote }] });
         }
 
         showLoadingIndicator();
@@ -570,6 +651,10 @@ Yanıtlarını kurgularken profili dikkate al ve şu felsefeyi KURALLAR olarak k
             if (data.error) throw new Error(typeof data.error === 'string' ? data.error : (data.error.message || "Hata oluştu."));
 
             let botReply = data.candidates[0].content.parts[0].text;
+            
+            // Modele eklediğimiz [SİSTEM NOTU]'nu API'nin hafızasında geçmişe eklerken sadece asıl mesaj olarak saklayalım ki modelin kafası karışmasın
+            // Gerçek kullanıcı mesajını temiz haliyle (sistem notsuz) history'ye geri yazabiliriz (İsteğe bağlı)
+            
             chatHistory.push({ role: "model", parts: [{ text: botReply }] });
 
             appendMessage(botReply, "bot-message");
