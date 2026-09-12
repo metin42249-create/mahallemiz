@@ -567,28 +567,28 @@
         appendMessage(userText, "user-message");
         inputField.value = "";
 
-        // İNGİLİZCE MODEL YÖNERGELERİ
+        // İNGİLİZCE MODEL YÖNERGELERİ (KULLANICI DİLİNE DİNAMİK UYARLAMA)
         const styleSelect = document.getElementById("responseStyle").value;
         const customStyle = document.getElementById("customResponseStyle").value.trim();
         
         let styleInstruction = "";
         if (styleSelect === "soru_cevap") {
-             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in the same language as the user, using the provided framework: 'The Prophet (PBUH) would answer this question like this...'";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in the same language as the user's input using the framework: 'The Prophet (PBUH) would answer this question like this...'";
         } else if (styleSelect === "yerimde_olsa") {
-             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in the same language as the user, using the provided framework: 'If the Prophet (PBUH) were in your situation right now, he would...'";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in the same language as the user's input using the framework: 'If the Prophet (PBUH) were in your situation right now, he would...'";
         } else if (styleSelect === "bunun_yerine") {
-             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Use this framework to offer a constructive alternative in the user's language: 'Instead of what you are doing right now, the Prophet (PBUH) would do...'";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Offer a constructive alternative in the same language as the user's input using the framework: 'Instead of what you are doing right now, the Prophet (PBUH) would do...'";
         } else if (styleSelect === "bu_saatte") {
-             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Describe your daily routine and respond in the user's language: 'At this specific time of day, the Prophet (PBUH) usually occupied himself with...'";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in the same language as the user's input referring to his daily routine: 'At this specific time of day, the Prophet (PBUH) usually occupied himself with...'";
         } else if (styleSelect === "diger" && customStyle !== "") {
-             styleInstruction = `Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in your user language, strictly adhering to this user-defined style preference: '${customStyle}'.`;
+             styleInstruction = `Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in the same language as the user's input adhering strictly to this user-defined style preference: '${customStyle}'.`;
         } else {
-             styleInstruction = "Task: Act as a warm, supportive spiritual companion who knows the Prophet (PBUH) deeply. Provide gentle guidance in user-friendly language and make sure the user feels genuinely supported.";
+             styleInstruction = "Task: Act as a warm, supportive spiritual companion who knows the Prophet (PBUH) deeply. Provide gentle guidance in the same language as the user's input and make the user feel genuinely supported.";
         }
 
         const systemNote = `\n\n[SYSTEM INSTRUCTION: ${styleInstruction}]`;
 
-        // İLK MESAJ: İNGİLİZCE SİSTEM İSTEMİ (SYSTEM PROMPT)
+        // İLK MESAJ: İNGİLİZCE SİSTEM İSTEMİ (DYNAMIC LANGUAGE MANDATE)
         if (chatHistory.length === 0) {
             const city = document.getElementById("city").value.trim() || "Not specified";
             const envSelect = document.getElementById("environment").value;
@@ -605,7 +605,7 @@
 
             const systemPrompt = `You are a sincere spiritual mentor who embodies the morality and manners of Prophet Muhammad (PBUH) and his companions.
 
-CRITICAL MANDATE: PLEASE ALWAYS WRITE YOUR ANSWERS IN THE USER'S LANGUAGE.
+CRITICAL MANDATE: ALWAYS DETECT AND RESPOND IN THE EXACT SAME LANGUAGE USED BY THE USER IN THEIR MESSAGE.
 
 User Context & Profile:
 - City: ${city}
