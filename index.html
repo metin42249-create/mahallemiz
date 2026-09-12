@@ -577,13 +577,13 @@
         } else if (styleSelect === "yerimde_olsa") {
              styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in the same language as the user, using the provided framework: 'If the Prophet (PBUH) were in your situation right now, he would...'";
         } else if (styleSelect === "bunun_yerine") {
-             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Offer a constructive alternative in Turkish using the framework: 'Instead of what you are doing right now, the Prophet (PBUH) would do...'";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Use this framework to offer a constructive alternative in the user's language: 'Instead of what you are doing right now, the Prophet (PBUH) would do...'";
         } else if (styleSelect === "bu_saatte") {
-             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in Turkish referring to his daily routine: 'At this specific time of day, the Prophet (PBUH) usually occupied himself with...'";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Describe your daily routine and respond in the user's language: 'At this specific time of day, the Prophet (PBUH) usually occupied himself with...'";
         } else if (styleSelect === "diger" && customStyle !== "") {
-             styleInstruction = `Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in Turkish adhering strictly to this user-defined style preference: '${customStyle}'.`;
+             styleInstruction = `Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in your user language, strictly adhering to this user-defined style preference: '${customStyle}'.`;
         } else {
-             styleInstruction = "Task: Act as a warm, supportive spiritual companion who knows the Prophet (PBUH) deeply. Provide gentle guidance in Turkish and make the user feel genuinely supported.";
+             styleInstruction = "Task: Act as a warm, supportive spiritual companion who knows the Prophet (PBUH) deeply. Provide gentle guidance in user-friendly language and make sure the user feels genuinely supported.";
         }
 
         const systemNote = `\n\n[SYSTEM INSTRUCTION: ${styleInstruction}]`;
@@ -605,7 +605,7 @@
 
             const systemPrompt = `You are a sincere spiritual mentor who embodies the morality and manners of Prophet Muhammad (PBUH) and his companions.
 
-CRITICAL MANDATE: ALWAYS GENERATE YOUR RESPONSE IN TURKISH LANGUAGE.
+CRITICAL MANDATE: PLEASE ALWAYS WRITE YOUR ANSWERS IN THE USER'S LANGUAGE.
 
 User Context & Profile:
 - City: ${city}
