@@ -446,45 +446,79 @@
     let isRecording = false;
     const STORAGE_PREFIX = 'manevi_yoldas_';
 
-    // SPEECH RECOGNITION (SESİ METNE ÇEVİRME) - BROWSER NATIVE
+    // SPEECH RECOGNITION (SESİ METNE ÇEVİRME)
+    let recognitionRestartTimer = null;
+
     function initSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micBtn = document.getElementById("micBtn");
+
         if (!SpeechRecognition) {
-            console.warn("Tarayıcınız Konuşma Tanıma (SpeechRecognition) özelliğini desteklemiyor.");
-            document.getElementById("micBtn").style.display = "none";
+            console.warn("Bu tarayıcı SpeechRecognition özelliğini desteklemiyor.");
+            micBtn.title = "Sesle yazma bu tarayıcıda desteklenmiyor";
+            micBtn.disabled = true;
+            micBtn.style.opacity = "0.5";
             return;
         }
 
         recognition = new SpeechRecognition();
         recognition.lang = 'tr-TR';
-        recognition.continuous = true; // Konuşma aralarında mikrofonun hemen kapanmasını önler
-        recognition.interimResults = true; // Anlık konuşmaları işler
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
             isRecording = true;
-            const micBtn = document.getElementById("micBtn");
             micBtn.classList.add("recording");
             micBtn.innerHTML = `<i class="fa-solid fa-microphone-slash"></i>`;
+            micBtn.title = "Dinliyor — durdurmak için tıklayın";
         };
 
         recognition.onresult = (event) => {
-            let transcript = '';
+            let finalText = "";
+            let interimText = "";
+
             for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
                 if (event.results[i].isFinal) {
-                    transcript += event.results[i][0].transcript;
+                    finalText += transcript;
+                } else {
+                    interimText += transcript;
                 }
             }
-            if (transcript) {
-                const userInput = document.getElementById("userInput");
-                userInput.value = userInput.value ? `${userInput.value} ${transcript}` : transcript;
+
+            const userInput = document.getElementById("userInput");
+            if (finalText) {
+                userInput.value = userInput.value
+                    ? `${userInput.value} ${finalText}`.trim()
+                    : finalText.trim();
+            }
+
+            // Geçici metni kutuda gösterirken daha önce yazılmış metni koru.
+            if (interimText && !finalText) {
+                userInput.dataset.speechInterim = interimText;
+            } else {
+                delete userInput.dataset.speechInterim;
             }
         };
 
         recognition.onerror = (event) => {
             console.error("Ses tanıma hatası:", event.error);
-            if (event.error !== 'no-speech') {
-                stopRecordingState();
+
+            const messages = {
+                "not-allowed": "Mikrofon izni verilmedi. Tarayıcı adres çubuğundaki mikrofon iznini açın.",
+                "service-not-allowed": "Tarayıcı ses tanıma hizmetine izin vermedi.",
+                "audio-capture": "Mikrofon bulunamadı veya başka bir uygulama tarafından kullanılıyor.",
+                "network": "Ses tanıma için ağ bağlantısı gerekli.",
+                "aborted": "Ses tanıma durduruldu."
+            };
+
+            if (event.error !== "no-speech") {
+                const msg = messages[event.error];
+                if (msg) console.warn(msg);
             }
+
+            stopRecordingState();
         };
 
         recognition.onend = () => {
@@ -493,30 +527,55 @@
     }
 
     function toggleSpeechRecognition() {
+        // getUserMedia yalnızca izin durumunu kontrol etmek için kullanılır;
+        // gerçek konuşma tanımayı SpeechRecognition yürütür.
         if (!recognition) {
-            alert("Tarayıcınız sesle yazma özelliğini desteklememektedir.");
+            alert("Bu tarayıcıda sesle yazma desteklenmiyor. Güncel Chrome veya Edge kullanın.");
             return;
         }
 
         if (isRecording) {
-            recognition.stop();
+            try { recognition.stop(); } catch (_) {}
         } else {
-            recognition.start();
+            // Yeni kayıt başlamadan önce olası eski konuşmayı durdur.
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            try {
+                recognition.start();
+            } catch (error) {
+                // start() arka arkaya çağrılırsa InvalidStateError oluşabilir.
+                console.warn("Mikrofon başlatılamadı:", error);
+            }
         }
     }
 
     function stopRecordingState() {
         isRecording = false;
         const micBtn = document.getElementById("micBtn");
+        if (!micBtn) return;
         micBtn.classList.remove("recording");
         micBtn.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+        micBtn.title = "Sesle Yaz";
     }
 
-    // SPEECH SYNTHESIS (METNİ SESE ÇEVİRME) - BROWSER NATIVE
+    // SPEECH SYNTHESIS (METNİ SESE ÇEVİRME)
+    let turkishVoice = null;
+
+    function loadTurkishVoice() {
+        if (!('speechSynthesis' in window)) return;
+        const voices = window.speechSynthesis.getVoices();
+        turkishVoice =
+            voices.find(v => /^tr(-|_)/i.test(v.lang)) ||
+            voices.find(v => (v.lang || "").toLowerCase().includes("tr")) ||
+            null;
+    }
+
     function toggleAudioOutput() {
         isAudioOutputEnabled = !isAudioOutputEnabled;
         const audioBtn = document.getElementById("audioToggleBtn");
-        
+
         if (isAudioOutputEnabled) {
             audioBtn.innerHTML = `<i class="fa-solid fa-volume-high"></i>`;
             audioBtn.title = "Sesli Yanıt Açık (Kapatmak için tıklayın)";
@@ -532,34 +591,46 @@
     function speakText(text) {
         if (!isAudioOutputEnabled || !('speechSynthesis' in window)) return;
 
-        window.speechSynthesis.cancel(); // Önceki okumaları durdur
-
-        // HTML etiketlerini ve Markdown karakterlerini temizle
         const cleanText = text
-            .replace(/<[^>]*>/g, '')
+            .replace(/<[^>]*>/g, ' ')
             .replace(/[*_#`~]/g, '')
+            .replace(/\s+/g, ' ')
             .trim();
 
         if (!cleanText) return;
 
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'tr-TR';
-        utterance.rate = 1.0;
+        const synth = window.speechSynthesis;
+        synth.cancel();
 
-        // Tarayıcıdaki Türkçe sesi açıkça bul ve ata
-        const voices = window.speechSynthesis.getVoices();
-        const trVoice = voices.find(v => v.lang && v.lang.includes('tr'));
-        if (trVoice) utterance.voice = trVoice;
+        // Bazı Chrome sürümlerinde cancel() sonrası speak() için kısa bir
+        // zaman aralığı gerekir.
+        setTimeout(() => {
+            if (!isAudioOutputEnabled) return;
 
-        // Chrome/Webview üzerindeki takılma durumlarını çözmek için resume tetiklemesi
-        window.speechSynthesis.resume();
-        window.speechSynthesis.speak(utterance);
+            loadTurkishVoice();
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'tr-TR';
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            if (turkishVoice) {
+                utterance.voice = turkishVoice;
+            }
+
+            utterance.onerror = (event) => {
+                console.warn("Sesli yanıt hatası:", event.error);
+            };
+
+            synth.resume();
+            synth.speak(utterance);
+        }, 80);
     }
 
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.getVoices();
-        };
+        loadTurkishVoice();
+        window.speechSynthesis.onvoiceschanged = loadTurkishVoice;
     }
 
     function initTheme() {
@@ -763,6 +834,9 @@ Yanıtlarını kurgularken profili dikkate al ve şu felsefeyi KURALLAR olarak k
         initTheme();
         loadSettings();
         initSpeechRecognition();
+        if ('speechSynthesis' in window) {
+            setTimeout(loadTurkishVoice, 300);
+        }
     });
 </script>
 
