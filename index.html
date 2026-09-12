@@ -61,8 +61,8 @@
             display: flex;
             justify-content: center;
             height: 100vh;
-            height: 100dvh; /* MOBİL BOŞLUK SORUNUNU ÇÖZER */
-            overflow: hidden; /* Gövdenin kaymasını engeller */
+            height: 100dvh;
+            overflow: hidden;
             transition: var(--transition);
         }
 
@@ -212,7 +212,6 @@
             transform: translateY(-1px);
         }
 
-        /* YENİ: SÜREKLİ GÖRÜNÜR CEVAP ÇEŞİDİ PANELİ */
         .response-style-panel {
             background-color: var(--setup-bg);
             border-bottom: 1px solid var(--setup-border);
@@ -285,12 +284,12 @@
             gap: 12px;
             background-color: var(--chat-bg);
             align-items: center;
-            flex-shrink: 0; /* BUTONUN VE ALANIN EZİLMESİNİ ENGELLER */
+            flex-shrink: 0;
         }
 
         .input-area input {
             flex: 1;
-            min-width: 0; /* Input alanının genişleyip butonu dışarı atmasını engeller */
+            min-width: 0;
             border-radius: 30px;
             padding: 14px 20px;
             background-color: var(--input-bg);
@@ -311,8 +310,8 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            flex-shrink: 0; /* BUTONUN KÜÇÜLMESİNİ ENGELLER */
-            white-space: nowrap; /* YAZININ ALT ALTA GEÇMESİNİ ENGELLER */
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .btn-send:hover {
@@ -436,7 +435,7 @@
         </button>
     </div>
 
-    <!-- YENİ EKLENEN: CEVAP ÇEŞİDİ / SORU TARZI PANELİ (SÜREKLİ GÖRÜNÜR) -->
+    <!-- CEVAP ÇEŞİDİ / SORU TARZI PANELİ -->
     <div class="response-style-panel">
         <label for="responseStyle"><i class="fa-solid fa-list-check"></i> Cevap / Sohbet Tarzı:</label>
         <select id="responseStyle" onchange="handleStyleChange()">
@@ -538,7 +537,6 @@
         customEnvGroup.style.display = envSelect.value === "Diğer" ? "flex" : "none";
     }
     
-    // YENİ EKLENEN: CEVAP ÇEŞİDİ DEĞİŞTİRME MANTIĞI
     function handleStyleChange() {
         const styleSelect = document.getElementById("responseStyle");
         const customInput = document.getElementById("customResponseStyle");
@@ -569,30 +567,30 @@
         appendMessage(userText, "user-message");
         inputField.value = "";
 
-        // CEVAP TARZINI AL VE YÖNERGEYİ HAZIRLA
+        // İNGİLİZCE MODEL YÖNERGELERİ
         const styleSelect = document.getElementById("responseStyle").value;
         const customStyle = document.getElementById("customResponseStyle").value.trim();
         
         let styleInstruction = "";
         if (styleSelect === "soru_cevap") {
-             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan biri dilinden ver (kendini ben şuyum gibi tanımlamak yok) ve 'Peygamberimiz (s.a.v.) bu sorunu şöyle cevaplardı...' mantığıyla anlat.";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in the same language as the user, using the provided framework: 'The Prophet (PBUH) would answer this question like this...'";
         } else if (styleSelect === "yerimde_olsa") {
-             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir çok iyi tanıyan biri dilinden ver (kendini ben şuyum gibi tanımlamak yok) ve 'Peygamberimiz (s.a.v.) senin yerinde olsaydı şu an şöyle yapardı...' mantığıyla anlat.";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Please respond in the same language as the user, using the provided framework: 'If the Prophet (PBUH) were in your situation right now, he would...'";
         } else if (styleSelect === "bunun_yerine") {
-             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir çok iyi tanıyan biri dilinden ver (kendini ben şuyum gibi tanımlamak yok) ve 'Peygamberimiz (s.a.v.) senin şu an yaptığın şeyin yerine şunu yapardı...' mantığıyla alternatif sun.";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Offer a constructive alternative in Turkish using the framework: 'Instead of what you are doing right now, the Prophet (PBUH) would do...'";
         } else if (styleSelect === "bu_saatte") {
-             styleInstruction = "Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir çok iyi tanıyan biri dilinden ver (kendini ben şuyum gibi tanımlamak yok) ve 'Peygamberimiz (s.a.v.) günün tam bu saatlerinde genelde şununla meşgul olurdu...' diyerek günlük rutini üzerinden yanıtla.";
+             styleInstruction = "Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in Turkish referring to his daily routine: 'At this specific time of day, the Prophet (PBUH) usually occupied himself with...'";
         } else if (styleSelect === "diger" && customStyle !== "") {
-             styleInstruction = `Görev: Cevabını Peygamberimizi (S.A.V.) çok iyi tanıyan bir çok iyi tanıyan biri dilinden ver (kendini ben şuyum gibi tanımlamak yok) ve tam olarak şu tarza uygun cevapla: '${customStyle}'.`;
+             styleInstruction = `Task: Speak from the perspective of someone who knows Prophet Muhammad (PBUH) very deeply (do not explicitly introduce yourself). Respond in Turkish adhering strictly to this user-defined style preference: '${customStyle}'.`;
         } else {
-             styleInstruction = "Görev: Peygamberimizi çok iyi tanıyan bir dost gibi manevi yoldaşlık yap, yanında olduğunu hissettir.";
+             styleInstruction = "Task: Act as a warm, supportive spiritual companion who knows the Prophet (PBUH) deeply. Provide gentle guidance in Turkish and make the user feel genuinely supported.";
         }
 
-        const systemNote = `\n\n[SİSTEM NOTU: ${styleInstruction}]`;
+        const systemNote = `\n\n[SYSTEM INSTRUCTION: ${styleInstruction}]`;
 
-        // EĞER İLK MESAJ İSE SİSTEM İSTEMİNİ (PROMPT) BURADA KURGUYORUZ
+        // İLK MESAJ: İNGİLİZCE SİSTEM İSTEMİ (SYSTEM PROMPT)
         if (chatHistory.length === 0) {
-            const city = document.getElementById("city").value.trim() || "Belirtilmedi";
+            const city = document.getElementById("city").value.trim() || "Not specified";
             const envSelect = document.getElementById("environment").value;
             const customEnv = document.getElementById("customEnvironment").value.trim();
             const environment = (envSelect === "Diğer" && customEnv !== "") ? customEnv : envSelect;
@@ -605,20 +603,22 @@
             const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
             const dateString = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            const systemPrompt = `Sen, Peygamberimiz Hz. Muhammed'in (S.A.V.) ve ashabının ahlakını yaşayan, samimi bir manevi rehbersin.
+            const systemPrompt = `You are a sincere spiritual mentor who embodies the morality and manners of Prophet Muhammad (PBUH) and his companions.
 
-Kullanıcının Mevcut Durumu ve Profili:
-- Şehir: ${city}
-- Tarih / Gün: ${dateString}
-- Yerel Saat: ${timeString}
-- Bulunduğu Ortam: ${environment}
-- Cinsiyet: ${gender}
-- Yaş Grubu: ${ageGroup}
-- Sağlık Durumu: ${healthStatus}
-- Maddi Durum: ${financialStatus}
+CRITICAL MANDATE: ALWAYS GENERATE YOUR RESPONSE IN TURKISH LANGUAGE.
 
-Yanıtlarını kurgularken profili dikkate al.
-Kullanıcı Ne Yapıyor / Ne Soruyor: "${userText}"
+User Context & Profile:
+- City: ${city}
+- Current Date / Day: ${dateString}
+- Local Time: ${timeString}
+- Current Environment: ${environment}
+- Gender: ${gender}
+- Age Group: ${ageGroup}
+- Health Status: ${healthStatus}
+- Financial Status: ${financialStatus}
+
+Take the user's profile and current situation into consideration when framing your response.
+User Action / Query: "${userText}"
 ${systemNote}`;
 
             chatHistory.push({ role: "user", parts: [{ text: systemPrompt }] });
@@ -627,7 +627,6 @@ ${systemNote}`;
             if(welcomeMsg) welcomeMsg.style.display = 'none';
 
         } else {
-            // Sonraki mesajlarda o an seçili olan cevap tarzını modele hatırlatıyoruz
             chatHistory.push({ role: "user", parts: [{ text: userText + systemNote }] });
         }
 
@@ -648,12 +647,9 @@ ${systemNote}`;
             const data = await response.json();
             removeLoadingIndicator();
 
-            if (data.error) throw new Error(typeof data.error === 'string' ? data.error : (data.error.message || "Hata oluştu."));
+            if (data.error) throw new Error(typeof data.error === 'string' ? data.error : (data.error.message || "Bir hata oluştu."));
 
             let botReply = data.candidates[0].content.parts[0].text;
-            
-            // Modele eklediğimiz [SİSTEM NOTU]'nu API'nin hafızasında geçmişe eklerken sadece asıl mesaj olarak saklayalım ki modelin kafası karışmasın
-            // Gerçek kullanıcı mesajını temiz haliyle (sistem notsuz) history'ye geri yazabiliriz (İsteğe bağlı)
             
             chatHistory.push({ role: "model", parts: [{ text: botReply }] });
 
