@@ -335,8 +335,8 @@
     <header>
         <h1><i class="fa-solid fa-moon"></i> İslâmî Zeka - Manevi Yoldaş</h1>
         <div class="header-actions">
-            <button class="icon-btn" onclick="toggleAudioOutput()" id="audioToggleBtn" title="Sesli Yanıt Aç/Kapat">
-                <i class="fa-solid fa-volume-xmark"></i>
+            <button class="icon-btn" onclick="toggleAudioOutput()" id="audioToggleBtn" title="Sesli Yanıt Açık (Kapatmak için tıklayın)">
+                <i class="fa-solid fa-volume-high"></i>
             </button>
             <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Temayı Değiştir">
                 <i class="fa-solid fa-sun"></i>
@@ -441,7 +441,7 @@
 
 <script>
     let chatHistory = [];
-    let isAudioOutputEnabled = false;
+    let isAudioOutputEnabled = true; // Varsayılan olarak açık
     let recognition = null;
     let isRecording = false;
     const STORAGE_PREFIX = 'manevi_yoldas_';
@@ -457,8 +457,8 @@
 
         recognition = new SpeechRecognition();
         recognition.lang = 'tr-TR';
-        recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.continuous = true; // Konuşma aralarında mikrofonun hemen kapanmasını önler
+        recognition.interimResults = true; // Anlık konuşmaları işler
 
         recognition.onstart = () => {
             isRecording = true;
@@ -468,14 +468,23 @@
         };
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            const userInput = document.getElementById("userInput");
-            userInput.value = userInput.value ? `${userInput.value} ${transcript}` : transcript;
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    transcript += event.results[i][0].transcript;
+                }
+            }
+            if (transcript) {
+                const userInput = document.getElementById("userInput");
+                userInput.value = userInput.value ? `${userInput.value} ${transcript}` : transcript;
+            }
         };
 
         recognition.onerror = (event) => {
             console.error("Ses tanıma hatası:", event.error);
-            stopRecordingState();
+            if (event.error !== 'no-speech') {
+                stopRecordingState();
+            }
         };
 
         recognition.onend = () => {
@@ -536,8 +545,21 @@
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'tr-TR';
         utterance.rate = 1.0;
-        
+
+        // Tarayıcıdaki Türkçe sesi açıkça bul ve ata
+        const voices = window.speechSynthesis.getVoices();
+        const trVoice = voices.find(v => v.lang && v.lang.includes('tr'));
+        if (trVoice) utterance.voice = trVoice;
+
+        // Chrome/Webview üzerindeki takılma durumlarını çözmek için resume tetiklemesi
+        window.speechSynthesis.resume();
         window.speechSynthesis.speak(utterance);
+    }
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
     }
 
     function initTheme() {
